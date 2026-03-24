@@ -43,10 +43,6 @@
             0% { background-position: -200% center; }
             100% { background-position: 200% center; }
         }
-        @keyframes pulseGlow {
-            0%, 100% { box-shadow: var(--glow-shadow, none); }
-            50% { box-shadow: var(--glow-shadow-strong, none); }
-        }
         .loyalty-badge.diamond .tier-text {
             background: linear-gradient(90deg, #b9f2ff 0%, #ffffff 40%, #7fdbff 60%, #b9f2ff 100%);
             background-size: 200% auto;
@@ -72,31 +68,7 @@
             animation: shimmer 3s linear infinite;
         }
 
-        /* Loyalty row glow effect */
-        .info-row.loyalty-glow {
-            border-radius: 10px;
-            transition: box-shadow 0.4s ease, background 0.3s ease;
-            animation: pulseGlow 3s ease-in-out infinite;
-        }
-        .info-row.loyalty-glow.tier-diamond {
-            background: linear-gradient(135deg, rgba(185,242,255,0.08) 0%, rgba(127,219,255,0.04) 100%);
-            --glow-shadow: 0 0 12px rgba(185,242,255,0.15), inset 0 0 12px rgba(185,242,255,0.05);
-            --glow-shadow-strong: 0 0 20px rgba(185,242,255,0.25), inset 0 0 16px rgba(185,242,255,0.08);
-        }
-        .info-row.loyalty-glow.tier-gold {
-            background: linear-gradient(135deg, rgba(255,215,0,0.08) 0%, rgba(255,204,0,0.04) 100%);
-            --glow-shadow: 0 0 12px rgba(255,215,0,0.15), inset 0 0 12px rgba(255,215,0,0.05);
-            --glow-shadow-strong: 0 0 20px rgba(255,215,0,0.25), inset 0 0 16px rgba(255,215,0,0.08);
-        }
-        .info-row.loyalty-glow.tier-silver {
-            background: linear-gradient(135deg, rgba(224,224,224,0.08) 0%, rgba(192,192,192,0.04) 100%);
-            --glow-shadow: 0 0 12px rgba(224,224,224,0.12), inset 0 0 12px rgba(224,224,224,0.04);
-            --glow-shadow-strong: 0 0 20px rgba(224,224,224,0.2), inset 0 0 16px rgba(224,224,224,0.06);
-        }
-        .info-row.loyalty-glow .info-icon {
-            background: transparent;
-            border-color: transparent;
-        }
+
 
         /* ─── Color Picker Panel ─────────────────── */
         .color-edit-btn {
@@ -512,6 +484,8 @@
             padding: 10px 6px;
             border-radius: 8px;
             transition: background var(--transition);
+            position: relative;
+            cursor: pointer;
         }
         .opp-impact-row:hover { background: var(--edit-hover); }
         .opp-impact-sub {
@@ -519,6 +493,73 @@
             color: var(--text-muted);
             margin-top: 2px;
         }
+
+        /* ─── Opportunity Popup ──────────────────── */
+        .opp-popup {
+            display: none;
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 100%;
+            margin-top: 6px;
+            background: rgba(12,12,25,0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 12px;
+            padding: 12px 14px;
+            z-index: 50;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            max-height: 220px;
+            overflow-y: auto;
+        }
+        .opp-impact-row:hover .opp-popup { display: block; }
+        .opp-popup-title {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        .opp-popup-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .opp-popup-item:last-child { border-bottom: none; }
+        .opp-popup-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-white);
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-right: 10px;
+        }
+        .opp-popup-value {
+            font-size: 12px;
+            font-weight: 700;
+            color: #4cd964;
+            flex-shrink: 0;
+        }
+        .opp-popup-empty {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        .profile-card.dark-text .opp-popup {
+            background: rgba(255,255,255,0.95);
+            border-color: rgba(26,26,46,0.15);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+        }
+        .profile-card.dark-text .opp-popup-title { color: rgba(26,26,46,0.5); }
+        .profile-card.dark-text .opp-popup-name { color: #1a1a2e; }
+        .profile-card.dark-text .opp-popup-value { color: #0d6e1e; }
+        .profile-card.dark-text .opp-popup-item { border-bottom-color: rgba(26,26,46,0.08); }
+        .profile-card.dark-text .opp-popup-empty { color: rgba(26,26,46,0.4); }
         /* Dark text overrides */
         .profile-card.dark-text .opp-metric-card { background: rgba(26,26,46,0.06); border-color: rgba(26,26,46,0.12); }
         .profile-card.dark-text .opp-metric-card:hover { background: rgba(26,26,46,0.1); }
@@ -993,6 +1034,20 @@
 
         <!-- Opportunity Metrics Section -->
         <div class="score-section" id="opp-metrics-section">
+            <div class="opp-impact-row" id="opp-impact-row">
+                <div class="info-icon">
+                    <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+                </div>
+                <div class="info-content">
+                    <div class="info-label">CURRENT OPPORTUNITY IMPACT</div>
+                    <div class="info-value" id="val-opp-impact">—</div>
+                    <div class="opp-impact-sub" id="val-opp-impact-count"></div>
+                </div>
+                <div class="opp-popup" id="opp-popup">
+                    <div class="opp-popup-title">Open Opportunities</div>
+                    <div id="opp-popup-list"></div>
+                </div>
+            </div>
             <div class="opp-metrics-row">
                 <div class="opp-metric-card won">
                     <div class="opp-metric-icon">
@@ -1014,16 +1069,6 @@
                     </div>
                     <div class="opp-metric-number" id="val-winratio">—</div>
                     <div class="opp-metric-label">Win Ratio</div>
-                </div>
-            </div>
-            <div class="opp-impact-row">
-                <div class="info-icon">
-                    <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
-                </div>
-                <div class="info-content">
-                    <div class="info-label">CURRENT OPPORTUNITY IMPACT</div>
-                    <div class="info-value" id="val-opp-impact">—</div>
-                    <div class="opp-impact-sub" id="val-opp-impact-count"></div>
                 </div>
             </div>
         </div>
@@ -1288,10 +1333,7 @@
             const iconEl = document.getElementById("loyalty-icon");
             const heartSvg = iconEl.querySelector("svg");
             const row = iconEl.closest(".info-row");
-            // Clear previous glow classes
-            if (row) {
-                row.classList.remove("loyalty-glow", "tier-diamond", "tier-gold", "tier-silver");
-            }
+
             if (!tier) {
                 el.textContent = "Not set";
                 el.classList.add("empty");
@@ -1314,10 +1356,7 @@
             iconEl.style.background = "transparent";
             iconEl.style.borderColor = "transparent";
             if (heartSvg) heartSvg.style.fill = svgFill;
-            // Add glow effect to the whole row
-            if (row) {
-                row.classList.add("loyalty-glow", "tier-" + t);
-            }
+
             el.innerHTML = '<span class="loyalty-badge ' + cls + '"><span class="tier-icon">' + tierSymbol + '</span><span class="tier-text">' + tier + '</span></span>';
         }
 
@@ -1715,8 +1754,7 @@
         // ─── Opportunity Metrics ─────────────────────────────────
         async function fetchOpportunityMetrics() {
             try {
-                // Get all opportunities where this contact is the parent contact
-                const data = await crmApiFetch("/opportunities?$filter=_parentcontactid_value eq " + contactId + "&$select=statecode,statuscode,estimatedvalue,actualvalue");
+                const data = await crmApiFetch("/opportunities?$filter=_parentcontactid_value eq " + contactId + "&$select=name,statecode,statuscode,estimatedvalue,actualvalue");
                 if (!data || !data.value) return null;
 
                 const opps = data.value;
@@ -1727,7 +1765,7 @@
                 const winRatio = closed > 0 ? Math.round((won.length / closed) * 100) : null;
                 const openValue = open.reduce((sum, o) => sum + (o.estimatedvalue || 0), 0);
 
-                return { won: won.length, lost: lost.length, winRatio, openCount: open.length, openValue };
+                return { won: won.length, lost: lost.length, winRatio, openCount: open.length, openValue, openOpps: open };
             } catch (e) { return null; }
         }
 
@@ -1746,14 +1784,23 @@
 
             const impactEl = document.getElementById("val-opp-impact");
             const countEl = document.getElementById("val-opp-impact-count");
+            const popupList = document.getElementById("opp-popup-list");
+
             if (metrics.openCount > 0) {
                 impactEl.textContent = "$" + metrics.openValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 impactEl.classList.remove("empty");
                 countEl.textContent = metrics.openCount + " open " + (metrics.openCount === 1 ? "opportunity" : "opportunities");
+
+                popupList.innerHTML = metrics.openOpps.map(function(o) {
+                    var val = o.estimatedvalue != null ? "$" + o.estimatedvalue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—";
+                    var name = o.name || "Unnamed Opportunity";
+                    return '<div class="opp-popup-item"><span class="opp-popup-name" title="' + name.replace(/"/g, '&quot;') + '">' + name + '</span><span class="opp-popup-value">' + val + '</span></div>';
+                }).join("");
             } else {
                 impactEl.textContent = "No open opportunities";
                 impactEl.classList.add("empty");
                 countEl.textContent = "";
+                popupList.innerHTML = '<div class="opp-popup-empty">No open opportunities</div>';
             }
         }
 
