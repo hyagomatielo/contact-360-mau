@@ -497,22 +497,17 @@
         /* ─── Opportunity Popup ──────────────────── */
         .opp-popup {
             display: none;
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 100%;
-            margin-top: 6px;
             background: rgba(12,12,25,0.95);
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255,255,255,0.15);
             border-radius: 12px;
             padding: 12px 14px;
-            z-index: 50;
+            margin-top: 10px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.5);
             max-height: 220px;
             overflow-y: auto;
         }
-        .opp-impact-row:hover .opp-popup { display: block; }
+        .opp-popup.open { display: block; }
         .opp-popup-title {
             font-size: 10px;
             font-weight: 700;
@@ -1043,10 +1038,10 @@
                     <div class="info-value" id="val-opp-impact">—</div>
                     <div class="opp-impact-sub" id="val-opp-impact-count"></div>
                 </div>
-                <div class="opp-popup" id="opp-popup">
-                    <div class="opp-popup-title">Open Opportunities</div>
-                    <div id="opp-popup-list"></div>
-                </div>
+            </div>
+            <div class="opp-popup" id="opp-popup">
+                <div class="opp-popup-title">Open Opportunities</div>
+                <div id="opp-popup-list"></div>
             </div>
             <div class="opp-metrics-row">
                 <div class="opp-metric-card won">
@@ -1803,6 +1798,19 @@
                 popupList.innerHTML = '<div class="opp-popup-empty">No open opportunities</div>';
             }
         }
+
+        // Toggle popup on click
+        (function() {
+            document.addEventListener("click", function(e) {
+                var row = document.getElementById("opp-impact-row");
+                var popup = document.getElementById("opp-popup");
+                if (row && row.contains(e.target)) {
+                    popup.classList.toggle("open");
+                } else if (popup && !popup.contains(e.target)) {
+                    popup.classList.remove("open");
+                }
+            });
+        })();
 
         // ─── Relationship Health ─────────────────────────────────
         const HEALTH_STATE_MAP = { 0: "Good", 1: "Fair", 2: "Poor", 3: "Not enough info", 4: "No Closed Activities", 5: "Computing...", 6: "Error", 7: "Too old" };
