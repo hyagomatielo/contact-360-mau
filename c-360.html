@@ -826,6 +826,99 @@
         .profile-card.dark-text .rh-interaction-value { color: #1a1a2e; }
         .profile-card.dark-text .rh-no-data { color: rgba(26,26,46,0.4); }
         .profile-card.dark-text .rh-section { border-bottom-color: rgba(26,26,46,0.12); }
+
+        /* ─── Contact Role ────────────────────── */
+        .contact-role {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-top: 1px;
+            font-weight: 500;
+        }
+        .contact-role.empty { color: var(--text-muted); font-style: italic; font-weight: 400; }
+        .profile-card.dark-text .contact-role { color: rgba(26,26,46,0.65); }
+        .profile-card.dark-text .contact-role.empty { color: rgba(26,26,46,0.4); }
+
+        /* ─── Tab System ─────────────────────── */
+        .tab-bar {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--divider);
+            margin-bottom: 0;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px 0;
+            background: none;
+            border: none;
+            border-bottom: 2.5px solid transparent;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            cursor: pointer;
+            transition: color var(--transition), border-color var(--transition);
+            font-family: inherit;
+            text-align: center;
+        }
+        .tab-btn:hover { color: var(--text-light); }
+        .tab-btn.active {
+            color: var(--text-white);
+            border-bottom-color: var(--text-white);
+        }
+        .profile-card.dark-text .tab-btn { color: rgba(26,26,46,0.4); }
+        .profile-card.dark-text .tab-btn:hover { color: rgba(26,26,46,0.65); }
+        .profile-card.dark-text .tab-btn.active { color: #1a1a2e; border-bottom-color: #1a1a2e; }
+        .profile-card.dark-text .tab-bar { border-bottom-color: rgba(26,26,46,0.12); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* ─── Case History Section ────────────── */
+        .case-impact-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 6px;
+            border-radius: 8px;
+            transition: background var(--transition);
+            position: relative;
+            cursor: pointer;
+        }
+        .case-impact-row:hover { background: var(--edit-hover); }
+        .case-impact-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .case-metrics-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .case-metric-card {
+            flex: 1;
+            text-align: center;
+            padding: 14px 8px 12px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: background var(--transition), transform 0.15s ease;
+        }
+        .case-metric-card:hover { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+        .case-metric-card.resolved, .case-metric-card.cancelled { cursor: pointer; }
+        .case-metric-card .opp-metric-icon { width: 28px; height: 28px; margin: 0 auto 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .case-metric-card .opp-metric-icon svg { width: 18px; height: 18px; }
+        .case-metric-card.resolved .opp-metric-icon { background: rgba(76,217,100,0.18); }
+        .case-metric-card.resolved .opp-metric-icon svg { fill: #4cd964; }
+        .case-metric-card.cancelled .opp-metric-icon { background: rgba(255,149,0,0.18); }
+        .case-metric-card.cancelled .opp-metric-icon svg { fill: #ff9500; }
+        .case-metric-card .opp-metric-number { font-size: 22px; font-weight: 800; color: var(--text-white); line-height: 1.1; }
+        .case-metric-card .opp-metric-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-top: 4px; }
+        .profile-card.dark-text .case-metric-card { background: rgba(26,26,46,0.06); border-color: rgba(26,26,46,0.12); }
+        .profile-card.dark-text .case-metric-card:hover { background: rgba(26,26,46,0.1); }
+        .profile-card.dark-text .case-metric-card .opp-metric-number { color: #1a1a2e; }
+        .profile-card.dark-text .case-metric-card .opp-metric-label { color: rgba(26,26,46,0.5); }
+        .profile-card.dark-text .case-impact-sub { color: rgba(26,26,46,0.5); }
     </style>
 </head>
 <body>
@@ -883,6 +976,7 @@
                     <button class="edit-btn save" onclick="saveNameInline()">&#10003;</button>
                     <button class="edit-btn cancel" onclick="cancelEdit('contact-name','edit-name')">&#10007;</button>
                 </div>
+                <div class="contact-role" id="contact-role"></div>
                 <div class="contact-location" id="contact-location"></div>
                 <div class="header-pills">
                     <span class="header-pill empty" id="pill-nps" title="Click to edit NPS">
@@ -1035,52 +1129,104 @@
             </div>
         </div>
 
-        <!-- Opportunity Metrics Section -->
-        <div class="score-section" id="opp-metrics-section">
-            <div class="opp-impact-row" id="opp-impact-row">
-                <div class="info-icon">
-                    <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
-                </div>
-                <div class="info-content">
-                    <div class="info-label">CURRENT OPPORTUNITY IMPACT</div>
-                    <div class="info-value" id="val-opp-impact">—</div>
-                    <div class="opp-impact-sub" id="val-opp-impact-count"></div>
-                </div>
-            </div>
-            <div class="opp-popup" id="opp-popup">
-                <div class="opp-popup-title">Open Opportunities</div>
-                <div id="opp-popup-list"></div>
-            </div>
-            <div class="opp-metrics-row">
-                <div class="opp-metric-card won" id="opp-card-won">
-                    <div class="opp-metric-icon">
-                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        <!-- Tab Bar -->
+        <div class="tab-bar">
+            <button class="tab-btn active" data-tab="tab-sales">Sales</button>
+            <button class="tab-btn" data-tab="tab-service">Service</button>
+        </div>
+
+        <!-- Sales Tab -->
+        <div class="tab-content active" id="tab-sales">
+            <div class="score-section" id="opp-metrics-section">
+                <div class="opp-impact-row" id="opp-impact-row">
+                    <div class="info-icon">
+                        <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
                     </div>
-                    <div class="opp-metric-number" id="val-won">—</div>
-                    <div class="opp-metric-label">Closed Won</div>
-                </div>
-                <div class="opp-metric-card lost" id="opp-card-lost">
-                    <div class="opp-metric-icon">
-                        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                    <div class="info-content">
+                        <div class="info-label">CURRENT OPPORTUNITY IMPACT</div>
+                        <div class="info-value" id="val-opp-impact">—</div>
+                        <div class="opp-impact-sub" id="val-opp-impact-count"></div>
                     </div>
-                    <div class="opp-metric-number" id="val-lost">—</div>
-                    <div class="opp-metric-label">Closed Lost</div>
                 </div>
-                <div class="opp-metric-card ratio">
-                    <div class="opp-metric-icon">
-                        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+                <div class="opp-popup" id="opp-popup">
+                    <div class="opp-popup-title">Open Opportunities</div>
+                    <div id="opp-popup-list"></div>
+                </div>
+                <div class="opp-metrics-row">
+                    <div class="opp-metric-card won" id="opp-card-won">
+                        <div class="opp-metric-icon">
+                            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        </div>
+                        <div class="opp-metric-number" id="val-won">—</div>
+                        <div class="opp-metric-label">Closed Won</div>
                     </div>
-                    <div class="opp-metric-number" id="val-winratio">—</div>
-                    <div class="opp-metric-label">Win Ratio</div>
+                    <div class="opp-metric-card lost" id="opp-card-lost">
+                        <div class="opp-metric-icon">
+                            <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                        </div>
+                        <div class="opp-metric-number" id="val-lost">—</div>
+                        <div class="opp-metric-label">Closed Lost</div>
+                    </div>
+                    <div class="opp-metric-card ratio">
+                        <div class="opp-metric-icon">
+                            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+                        </div>
+                        <div class="opp-metric-number" id="val-winratio">—</div>
+                        <div class="opp-metric-label">Win Ratio</div>
+                    </div>
+                </div>
+                <div class="opp-popup" id="opp-popup-won">
+                    <div class="opp-popup-title">Closed Won Opportunities</div>
+                    <div id="opp-popup-won-list"></div>
+                </div>
+                <div class="opp-popup" id="opp-popup-lost">
+                    <div class="opp-popup-title">Closed Lost Opportunities</div>
+                    <div id="opp-popup-lost-list"></div>
                 </div>
             </div>
-            <div class="opp-popup" id="opp-popup-won">
-                <div class="opp-popup-title">Closed Won Opportunities</div>
-                <div id="opp-popup-won-list"></div>
-            </div>
-            <div class="opp-popup" id="opp-popup-lost">
-                <div class="opp-popup-title">Closed Lost Opportunities</div>
-                <div id="opp-popup-lost-list"></div>
+        </div>
+
+        <!-- Service Tab -->
+        <div class="tab-content" id="tab-service">
+            <div class="score-section" id="case-metrics-section">
+                <div class="case-impact-row" id="case-impact-row">
+                    <div class="info-icon">
+                        <svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM10 4h4v2h-4V4zm10 15H4V8h16v11z"/></svg>
+                    </div>
+                    <div class="info-content">
+                        <div class="info-label">OPEN CASES</div>
+                        <div class="info-value" id="val-case-impact">—</div>
+                        <div class="case-impact-sub" id="val-case-impact-count"></div>
+                    </div>
+                </div>
+                <div class="opp-popup" id="case-popup">
+                    <div class="opp-popup-title">Active Cases</div>
+                    <div id="case-popup-list"></div>
+                </div>
+                <div class="case-metrics-row">
+                    <div class="case-metric-card resolved" id="case-card-resolved">
+                        <div class="opp-metric-icon">
+                            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        </div>
+                        <div class="opp-metric-number" id="val-cases-resolved">—</div>
+                        <div class="opp-metric-label">Resolved</div>
+                    </div>
+                    <div class="case-metric-card cancelled" id="case-card-cancelled">
+                        <div class="opp-metric-icon">
+                            <svg viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>
+                        </div>
+                        <div class="opp-metric-number" id="val-cases-cancelled">—</div>
+                        <div class="opp-metric-label">Cancelled</div>
+                    </div>
+                </div>
+                <div class="opp-popup" id="case-popup-resolved">
+                    <div class="opp-popup-title">Resolved Cases</div>
+                    <div id="case-popup-resolved-list"></div>
+                </div>
+                <div class="opp-popup" id="case-popup-cancelled">
+                    <div class="opp-popup-title">Cancelled Cases</div>
+                    <div id="case-popup-cancelled-list"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -1189,7 +1335,7 @@
                 "emailaddress1", "telephone1",
                 "address1_line1", "address1_city", "address1_stateorprovince", "address1_postalcode", "address1_country", "address1_composite",
                 "cr4e0_customerid", "cr4e0_loyaltytier", "cr4e0_segment",
-
+                "jobtitle",
                 "entityimage_url",
             ].join(",");
 
@@ -1217,6 +1363,16 @@
 
             // Name
             document.getElementById("contact-name").textContent = data.fullname || "—";
+
+            // Role / Position
+            var roleEl = document.getElementById("contact-role");
+            if (data.jobtitle) {
+                roleEl.textContent = data.jobtitle;
+                roleEl.classList.remove("empty");
+            } else {
+                roleEl.textContent = "";
+                roleEl.classList.add("empty");
+            }
 
             // Location
             const city = data.address1_city || "";
@@ -1843,14 +1999,17 @@
             document.getElementById("opp-popup-lost-list").innerHTML = buildOppListHtml(metrics.lostOpps, "estimatedvalue", "lost-value");
         }
 
-        // Popup toggle logic with mutual exclusion
+        // Popup toggle logic with mutual exclusion (all popups across tabs)
         (function() {
             var popupMap = {
                 "opp-impact-row": "opp-popup",
                 "opp-card-won": "opp-popup-won",
-                "opp-card-lost": "opp-popup-lost"
+                "opp-card-lost": "opp-popup-lost",
+                "case-impact-row": "case-popup",
+                "case-card-resolved": "case-popup-resolved",
+                "case-card-cancelled": "case-popup-cancelled"
             };
-            var allPopupIds = ["opp-popup", "opp-popup-won", "opp-popup-lost"];
+            var allPopupIds = ["opp-popup", "opp-popup-won", "opp-popup-lost", "case-popup", "case-popup-resolved", "case-popup-cancelled"];
 
             function closeAllPopups(except) {
                 allPopupIds.forEach(function(id) {
@@ -1864,6 +2023,7 @@
             document.addEventListener("click", function(e) {
                 // Check if click is on a popup item with navigation
                 if (e.target.closest(".opp-popup-item[data-oppid]")) return;
+                if (e.target.closest(".opp-popup-item[data-caseid]")) return;
 
                 // Check if click is on a trigger
                 var triggered = false;
@@ -1889,6 +2049,83 @@
                 }
             });
         })();
+
+        // ─── Tab Switching ──────────────────────────────────────
+        (function() {
+            document.querySelectorAll(".tab-btn").forEach(function(btn) {
+                btn.addEventListener("click", function() {
+                    var tabId = btn.getAttribute("data-tab");
+                    document.querySelectorAll(".tab-btn").forEach(function(b) { b.classList.remove("active"); });
+                    document.querySelectorAll(".tab-content").forEach(function(tc) { tc.classList.remove("active"); });
+                    btn.classList.add("active");
+                    document.getElementById(tabId).classList.add("active");
+                });
+            });
+        })();
+
+        // ─── Case History ────────────────────────────────────────
+        async function fetchCaseMetrics() {
+            try {
+                var data = await crmApiFetch("/incidents?$filter=_customerid_value eq " + contactId + "&$select=title,statecode,statuscode,prioritycode,createdon,incidentid");
+                if (!data || !data.value) return null;
+                var cases = data.value;
+                var active = cases.filter(function(c) { return c.statecode === 0; });
+                var resolved = cases.filter(function(c) { return c.statecode === 1; });
+                var cancelled = cases.filter(function(c) { return c.statecode === 2; });
+                return { activeCount: active.length, resolvedCount: resolved.length, cancelledCount: cancelled.length, activeCases: active, resolvedCases: resolved, cancelledCases: cancelled };
+            } catch (e) { return null; }
+        }
+
+        function navigateToCase(caseId) {
+            try {
+                var xrm = getXrmContext();
+                if (xrm && xrm.Navigation && xrm.Navigation.openForm) {
+                    xrm.Navigation.openForm({ entityName: "incident", entityId: caseId });
+                    return;
+                }
+            } catch (e) {}
+            var url = crmBaseUrl + "/main.aspx?etn=incident&id=" + caseId + "&pagetype=entityrecord";
+            window.top.location.href = url;
+        }
+
+        function buildCaseListHtml(cases) {
+            if (!cases || cases.length === 0) return '<div class="opp-popup-empty">None</div>';
+            var priorityMap = { 1: "High", 2: "Normal", 3: "Low" };
+            return cases.map(function(c) {
+                var title = c.title || "Untitled Case";
+                var priority = priorityMap[c.prioritycode] || "";
+                var created = c.createdon ? new Date(c.createdon).toLocaleDateString("en-US") : "";
+                var badge = priority ? '<span class="opp-popup-value" style="font-size:10px;color:' + (c.prioritycode === 1 ? '#ff8a80' : 'var(--text-muted)') + '">' + priority + '</span>' : '';
+                return '<div class="opp-popup-item" data-caseid="' + c.incidentid + '" onclick="navigateToCase(\'' + c.incidentid + '\')">' +
+                    '<span class="opp-popup-name" title="' + title.replace(/"/g, '&quot;') + '">' + title + '</span>' +
+                    badge + '</div>';
+            }).join("");
+        }
+
+        function renderCaseMetrics(metrics) {
+            if (!metrics) return;
+            document.getElementById("val-cases-resolved").textContent = metrics.resolvedCount;
+            document.getElementById("val-cases-cancelled").textContent = metrics.cancelledCount;
+
+            var impactEl = document.getElementById("val-case-impact");
+            var countEl = document.getElementById("val-case-impact-count");
+            var popupList = document.getElementById("case-popup-list");
+
+            if (metrics.activeCount > 0) {
+                impactEl.textContent = metrics.activeCount + " active " + (metrics.activeCount === 1 ? "case" : "cases");
+                impactEl.classList.remove("empty");
+                countEl.textContent = "Click to view details";
+                popupList.innerHTML = buildCaseListHtml(metrics.activeCases);
+            } else {
+                impactEl.textContent = "No open cases";
+                impactEl.classList.add("empty");
+                countEl.textContent = "";
+                popupList.innerHTML = '<div class="opp-popup-empty">No active cases</div>';
+            }
+
+            document.getElementById("case-popup-resolved-list").innerHTML = buildCaseListHtml(metrics.resolvedCases);
+            document.getElementById("case-popup-cancelled-list").innerHTML = buildCaseListHtml(metrics.cancelledCases);
+        }
 
         // ─── Relationship Health ─────────────────────────────────
         const HEALTH_STATE_MAP = { 0: "Good", 1: "Fair", 2: "Poor", 3: "Not enough info", 4: "No Closed Activities", 5: "Computing...", 6: "Error", 7: "Too old" };
@@ -2001,6 +2238,11 @@
                 // Load Opportunity Metrics
                 fetchOpportunityMetrics()
                     .then(metrics => renderOpportunityMetrics(metrics))
+                    .catch(() => {});
+
+                // Load Case Metrics
+                fetchCaseMetrics()
+                    .then(metrics => renderCaseMetrics(metrics))
                     .catch(() => {});
             } catch (err) {
                 document.getElementById("loading-screen").classList.add("hidden");
