@@ -460,6 +460,72 @@
         .progress-fill.orange { background: var(--bar-fill); }
         .progress-fill.green { background: var(--bar-fill-green); }
 
+        /* ─── Opportunity Metrics ────────────────── */
+        .opp-metrics-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .opp-metric-card {
+            flex: 1;
+            text-align: center;
+            padding: 14px 8px 12px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: background var(--transition), transform 0.15s ease;
+        }
+        .opp-metric-card:hover { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+        .opp-metric-icon {
+            width: 28px; height: 28px;
+            margin: 0 auto 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .opp-metric-icon svg { width: 18px; height: 18px; }
+        .opp-metric-card.won .opp-metric-icon { background: rgba(76,217,100,0.18); }
+        .opp-metric-card.won .opp-metric-icon svg { fill: #4cd964; }
+        .opp-metric-card.lost .opp-metric-icon { background: rgba(255,59,48,0.18); }
+        .opp-metric-card.lost .opp-metric-icon svg { fill: #ff3b30; }
+        .opp-metric-card.ratio .opp-metric-icon { background: rgba(90,200,250,0.18); }
+        .opp-metric-card.ratio .opp-metric-icon svg { fill: #5ac8fa; }
+        .opp-metric-number {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-white);
+            line-height: 1.1;
+        }
+        .opp-metric-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        .opp-impact-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 6px;
+            border-radius: 8px;
+            transition: background var(--transition);
+        }
+        .opp-impact-row:hover { background: var(--edit-hover); }
+        .opp-impact-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        /* Dark text overrides */
+        .profile-card.dark-text .opp-metric-card { background: rgba(26,26,46,0.06); border-color: rgba(26,26,46,0.12); }
+        .profile-card.dark-text .opp-metric-card:hover { background: rgba(26,26,46,0.1); }
+        .profile-card.dark-text .opp-metric-number { color: #1a1a2e; }
+        .profile-card.dark-text .opp-metric-label { color: rgba(26,26,46,0.5); }
+        .profile-card.dark-text .opp-impact-sub { color: rgba(26,26,46,0.5); }
+
         /* ─── Inline Edit ───────────────────────── */
         .inline-edit {
             display: none;
@@ -925,59 +991,40 @@
             </div>
         </div>
 
-        <!-- Scores Section -->
-        <div class="score-section">
-            <div class="score-row" data-field="cr4e0_lifetimevalue" data-type="money">
-                <div class="score-header">
-                    <div class="info-icon">
-                        <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+        <!-- Opportunity Metrics Section -->
+        <div class="score-section" id="opp-metrics-section">
+            <div class="opp-metrics-row">
+                <div class="opp-metric-card won">
+                    <div class="opp-metric-icon">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                     </div>
-                    <div class="info-content">
-                        <div class="info-label">Lifetime Value</div>
-                        <div class="info-value" id="val-ltv"></div>
-                        <div class="inline-edit" id="edit-ltv">
-                            <input type="number" id="input-ltv" placeholder="e.g., 65321" step="0.01" />
-                            <button class="edit-btn save" onclick="saveField('cr4e0_lifetimevalue','input-ltv','val-ltv','edit-ltv','money')">&#10003;</button>
-                            <button class="edit-btn cancel" onclick="cancelEdit('val-ltv','edit-ltv')">&#10007;</button>
-                        </div>
+                    <div class="opp-metric-number" id="val-won">—</div>
+                    <div class="opp-metric-label">Closed Won</div>
+                </div>
+                <div class="opp-metric-card lost">
+                    <div class="opp-metric-icon">
+                        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
                     </div>
+                    <div class="opp-metric-number" id="val-lost">—</div>
+                    <div class="opp-metric-label">Closed Lost</div>
+                </div>
+                <div class="opp-metric-card ratio">
+                    <div class="opp-metric-icon">
+                        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+                    </div>
+                    <div class="opp-metric-number" id="val-winratio">—</div>
+                    <div class="opp-metric-label">Win Ratio</div>
                 </div>
             </div>
-
-            <div class="score-row" data-field="cr4e0_propensitytopurchase" data-type="integer">
-                <div class="score-header">
-                    <div class="info-icon">
-                        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg>
-                    </div>
-                    <div class="info-content">
-                        <div class="info-label">Propensity to Purchase</div>
-                        <div class="info-value" id="val-propensity"></div>
-                        <div class="inline-edit" id="edit-propensity">
-                            <input type="number" id="input-propensity" placeholder="0-100" min="0" max="100" />
-                            <button class="edit-btn save" onclick="saveField('cr4e0_propensitytopurchase','input-propensity','val-propensity','edit-propensity','integer')">&#10003;</button>
-                            <button class="edit-btn cancel" onclick="cancelEdit('val-propensity','edit-propensity')">&#10007;</button>
-                        </div>
-                    </div>
+            <div class="opp-impact-row">
+                <div class="info-icon">
+                    <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
                 </div>
-                <div class="progress-bar"><div class="progress-fill orange" id="bar-propensity"></div></div>
-            </div>
-
-            <div class="score-row" data-field="cr4e0_engagementscore" data-type="integer">
-                <div class="score-header">
-                    <div class="info-icon">
-                        <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6h-6z"/></svg>
-                    </div>
-                    <div class="info-content">
-                        <div class="info-label">Engagement Score</div>
-                        <div class="info-value" id="val-engagement"></div>
-                        <div class="inline-edit" id="edit-engagement">
-                            <input type="number" id="input-engagement" placeholder="0-100" min="0" max="100" />
-                            <button class="edit-btn save" onclick="saveField('cr4e0_engagementscore','input-engagement','val-engagement','edit-engagement','integer')">&#10003;</button>
-                            <button class="edit-btn cancel" onclick="cancelEdit('val-engagement','edit-engagement')">&#10007;</button>
-                        </div>
-                    </div>
+                <div class="info-content">
+                    <div class="info-label">CURRENT OPPORTUNITY IMPACT</div>
+                    <div class="info-value" id="val-opp-impact">—</div>
+                    <div class="opp-impact-sub" id="val-opp-impact-count"></div>
                 </div>
-                <div class="progress-bar"><div class="progress-fill green" id="bar-engagement"></div></div>
             </div>
         </div>
     </div>
@@ -1086,7 +1133,7 @@
                 "emailaddress1", "telephone1",
                 "address1_line1", "address1_city", "address1_stateorprovince", "address1_postalcode", "address1_country", "address1_composite",
                 "cr4e0_customerid", "cr4e0_loyaltytier", "cr4e0_segment",
-                "cr4e0_lifetimevalue", "cr4e0_propensitytopurchase", "cr4e0_engagementscore",
+
                 "entityimage_url",
             ].join(",");
 
@@ -1154,33 +1201,7 @@
             renderLoyaltyTier(data.cr4e0_loyaltytier);
             setFieldValue("val-segment", data.cr4e0_segment, "Not set");
 
-            // Lifetime Value
-            const ltv = data.cr4e0_lifetimevalue;
-            if (ltv != null) {
-                setFieldValue("val-ltv", "$" + Number(ltv).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
-            } else {
-                setFieldValue("val-ltv", null, "Not set");
-            }
 
-            // Propensity to Purchase
-            const propensity = data.cr4e0_propensitytopurchase;
-            if (propensity != null) {
-                setFieldValue("val-propensity", propensity + "%");
-                document.getElementById("bar-propensity").style.width = propensity + "%";
-            } else {
-                setFieldValue("val-propensity", null, "Not set");
-                document.getElementById("bar-propensity").style.width = "0%";
-            }
-
-            // Engagement Score
-            const engagement = data.cr4e0_engagementscore;
-            if (engagement != null) {
-                setFieldValue("val-engagement", engagement + "%");
-                document.getElementById("bar-engagement").style.width = engagement + "%";
-            } else {
-                setFieldValue("val-engagement", null, "Not set");
-                document.getElementById("bar-engagement").style.width = "0%";
-            }
         }
 
         function setFieldValue(elementId, value, emptyText) {
@@ -1522,22 +1543,6 @@
                 });
             });
 
-            // Score rows
-            document.querySelectorAll(".score-row").forEach(row => {
-                row.addEventListener("click", (e) => {
-                    if (e.target.closest(".inline-edit")) return;
-
-                    const field = row.dataset.field;
-                    if (field === "cr4e0_lifetimevalue") {
-                        startEdit("val-ltv", "edit-ltv", contactData?.cr4e0_lifetimevalue);
-                    } else if (field === "cr4e0_propensitytopurchase") {
-                        startEdit("val-propensity", "edit-propensity", contactData?.cr4e0_propensitytopurchase);
-                    } else if (field === "cr4e0_engagementscore") {
-                        startEdit("val-engagement", "edit-engagement", contactData?.cr4e0_engagementscore);
-                    }
-                });
-            });
-
             // Name click-to-edit
             const nameEl = document.getElementById("contact-name");
             nameEl.addEventListener("click", () => {
@@ -1707,6 +1712,51 @@
             setTimeout(() => toast.classList.remove("show"), 2500);
         }
 
+        // ─── Opportunity Metrics ─────────────────────────────────
+        async function fetchOpportunityMetrics() {
+            try {
+                // Get all opportunities where this contact is the parent contact
+                const data = await crmApiFetch("/opportunities?$filter=_parentcontactid_value eq " + contactId + "&$select=statecode,statuscode,estimatedvalue,actualvalue");
+                if (!data || !data.value) return null;
+
+                const opps = data.value;
+                const won = opps.filter(o => o.statuscode === 3);
+                const lost = opps.filter(o => o.statuscode === 4);
+                const open = opps.filter(o => o.statecode === 0);
+                const closed = won.length + lost.length;
+                const winRatio = closed > 0 ? Math.round((won.length / closed) * 100) : null;
+                const openValue = open.reduce((sum, o) => sum + (o.estimatedvalue || 0), 0);
+
+                return { won: won.length, lost: lost.length, winRatio, openCount: open.length, openValue };
+            } catch (e) { return null; }
+        }
+
+        function renderOpportunityMetrics(metrics) {
+            if (!metrics) return;
+
+            document.getElementById("val-won").textContent = metrics.won;
+            document.getElementById("val-lost").textContent = metrics.lost;
+
+            const ratioEl = document.getElementById("val-winratio");
+            if (metrics.winRatio != null) {
+                ratioEl.textContent = metrics.winRatio + "%";
+            } else {
+                ratioEl.textContent = "N/A";
+            }
+
+            const impactEl = document.getElementById("val-opp-impact");
+            const countEl = document.getElementById("val-opp-impact-count");
+            if (metrics.openCount > 0) {
+                impactEl.textContent = "$" + metrics.openValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                impactEl.classList.remove("empty");
+                countEl.textContent = metrics.openCount + " open " + (metrics.openCount === 1 ? "opportunity" : "opportunities");
+            } else {
+                impactEl.textContent = "No open opportunities";
+                impactEl.classList.add("empty");
+                countEl.textContent = "";
+            }
+        }
+
         // ─── Relationship Health ─────────────────────────────────
         const HEALTH_STATE_MAP = { 0: "Good", 1: "Fair", 2: "Poor", 3: "Not enough info", 4: "No Closed Activities", 5: "Computing...", 6: "Error", 7: "Too old" };
         const HEALTH_STATE_CSS = { 0: "good", 1: "fair", 2: "poor" };
@@ -1813,6 +1863,11 @@
                 // Load Relationship Health data in parallel
                 Promise.all([fetchRelationshipHealth(), fetchNextInteraction(), fetchLastInteraction()])
                     .then(([kpi, nextAct, lastAct]) => renderRelationshipHealth(kpi, nextAct, lastAct))
+                    .catch(() => {});
+
+                // Load Opportunity Metrics
+                fetchOpportunityMetrics()
+                    .then(metrics => renderOpportunityMetrics(metrics))
                     .catch(() => {});
             } catch (err) {
                 document.getElementById("loading-screen").classList.add("hidden");
