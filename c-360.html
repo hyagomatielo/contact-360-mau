@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact 360 Profile</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --card-bg: linear-gradient(160deg, #1a6da5 0%, #2980b9 30%, #1f7bb5 60%, #1a6da5 100%);
+            --text-white: #ffffff;
+            --text-light: rgba(255,255,255,0.85);
+            --text-muted: rgba(255,255,255,0.6);
+            --divider: rgba(255,255,255,0.15);
+            --icon-bg: rgba(255,255,255,0.12);
+            --icon-border: rgba(255,255,255,0.25);
+            --edit-hover: rgba(255,255,255,0.08);
+            --bar-track: rgba(255,255,255,0.2);
+            --bar-fill: #f5a623;
+            --bar-fill-green: #4cd964;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --transition: 0.2s ease;
+        }
+
+        /* ─── Loyalty Tier Effects ───────────────── */
+        .loyalty-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 700;
+        }
+        .loyalty-badge .tier-icon {
+            font-size: 18px;
+            filter: none;
+        }
+        .loyalty-badge.diamond { color: #b9f2ff; text-shadow: 0 0 8px rgba(185,242,255,0.6); }
+        .loyalty-badge.gold { color: #ffd700; text-shadow: 0 0 8px rgba(255,215,0,0.5); }
+        .loyalty-badge.silver { color: #e0e0e0; text-shadow: 0 0 6px rgba(224,224,224,0.4); }
+
+        @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: var(--glow-shadow, none); }
+            50% { box-shadow: var(--glow-shadow-strong, none); }
+        }
+        .loyalty-badge.diamond .tier-text {
+            background: linear-gradient(90deg, #b9f2ff 0%, #ffffff 40%, #7fdbff 60%, #b9f2ff 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s linear infinite;
+        }
+        .loyalty-badge.gold .tier-text {
+            background: linear-gradient(90deg, #ffd700 0%, #fff5a0 40%, #ffcc00 60%, #ffd700 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s linear infinite;
+        }
+        .loyalty-badge.silver .tier-text {
+            background: linear-gradient(90deg, #e0e0e0 0%, #ffffff 40%, #c0c0c0 60%, #e0e0e0 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s linear infinite;
+        }
+
+        /* Loyalty row glow effect */
+        .info-row.loyalty-glow {
+            border-radius: 10px;
+            transition: box-shadow 0.4s ease, background 0.3s ease;
+            animation: pulseGlow 3s ease-in-out infinite;
+        }
+        .info-row.loyalty-glow.tier-diamond {
+            background: linear-gradient(135deg, rgba(185,242,255,0.08) 0%, rgba(127,219,255,0.04) 100%);
+            --glow-shadow: 0 0 12px rgba(185,242,255,0.15), inset 0 0 12px rgba(185,242,255,0.05);
+            --glow-shadow-strong: 0 0 20px rgba(185,242,255,0.25), inset 0 0 16px rgba(185,242,255,0.08);
+        }
+        .info-row.loyalty-glow.tier-gold {
+            background: linear-gradient(135deg, rgba(255,215,0,0.08) 0%, rgba(255,204,0,0.04) 100%);
+            --glow-shadow: 0 0 12px rgba(255,215,0,0.15), inset 0 0 12px rgba(255,215,0,0.05);
+            --glow-shadow-strong: 0 0 20px rgba(255,215,0,0.25), inset 0 0 16px rgba(255,215,0,0.08);
+        }
+        .info-row.loyalty-glow.tier-silver {
+            background: linear-gradient(135deg, rgba(224,224,224,0.08) 0%, rgba(192,192,192,0.04) 100%);
+            --glow-shadow: 0 0 12px rgba(224,224,224,0.12), inset 0 0 12px rgba(224,224,224,0.04);
+            --glow-shadow-strong: 0 0 20px rgba(224,224,224,0.2), inset 0 0 16px rgba(224,224,224,0.06);
+        }
+        .info-row.loyalty-glow .info-icon {
+            background: transparent;
+            border-color: transparent;
+        }
+
+        /* ─── Color Picker Panel ─────────────────── */
+        .color-edit-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 22px; height: 22px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.4;
+            transition: opacity var(--transition), background var(--transition);
+            z-index: 10;
+        }
+        .color-edit-btn:hover { opacity: 1; background: rgba(255,255,255,0.2); }
+        .color-edit-btn img { width: 12px; height: 12px; filter: brightness(0) invert(1); }
+
+        .color-picker-panel {
+            position: absolute;
+            top: 44px;
+            right: 10px;
+            background: rgba(15,15,25,0.92);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 12px;
+            padding: 16px;
+            z-index: 100;
+            width: 240px;
+            display: none;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        .color-picker-panel.open { display: block; }
+        .color-picker-panel h4 {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 10px;
+        }
+        .color-picker-close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 20px; height: 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            color: rgba(255,255,255,0.6);
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s, color 0.15s;
+            line-height: 1;
+            padding: 0;
+        }
+        .color-picker-close:hover { background: rgba(255,59,48,0.4); color: #fff; }
+        .color-swatches {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .color-swatch {
+            width: 100%; aspect-ratio: 1;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.15s, transform 0.15s;
+            position: relative;
+        }
+        .color-swatch:hover { transform: scale(1.1); }
+        .color-swatch.active { border-color: #fff; }
+        .color-swatch::after {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 6px;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
+        }
+        .custom-color-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .custom-color-row label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            white-space: nowrap;
+        }
+        .custom-color-row input[type="color"] {
+            width: 32px; height: 28px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            background: transparent;
+            cursor: pointer;
+            padding: 1px;
+        }
+        .custom-color-row input[type="color"]::-webkit-color-swatch-wrapper { padding: 2px; }
+        .custom-color-row input[type="color"]::-webkit-color-swatch { border-radius: 3px; border: none; }
+        .apply-custom-color {
+            flex: 1;
+            padding: 5px 10px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 11px;
+            cursor: pointer;
+            transition: background var(--transition);
+        }
+        .apply-custom-color:hover { background: rgba(255,255,255,0.25); }
+        .border-color-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .border-color-row label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            white-space: nowrap;
+        }
+        .border-color-row input[type="color"] {
+            width: 32px; height: 28px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            background: transparent;
+            cursor: pointer;
+            padding: 1px;
+        }
+        .border-color-row input[type="color"]::-webkit-color-swatch-wrapper { padding: 2px; }
+        .border-color-row input[type="color"]::-webkit-color-swatch { border-radius: 3px; border: none; }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: transparent;
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+            overflow-x: hidden;
+        }
+
+        /* ─── Card Container ────────────────────── */
+        .profile-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 28px 24px 24px;
+            color: var(--text-white);
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Dark text mode for light backgrounds */
+        .profile-card.dark-text { color: #1a1a2e; }
+        .profile-card.dark-text .contact-name,
+        .profile-card.dark-text .info-value,
+        .profile-card.dark-text .info-icon svg { color: #1a1a2e; fill: #1a1a2e; }
+        .profile-card.dark-text .contact-location,
+        .profile-card.dark-text .loading-text { color: rgba(26,26,46,0.7); }
+        .profile-card.dark-text .info-label { color: rgba(26,26,46,0.5); }
+        .profile-card.dark-text .info-value.empty { color: rgba(26,26,46,0.4); }
+        .profile-card.dark-text .info-section { border-bottom-color: rgba(26,26,46,0.12); }
+        .profile-card.dark-text .score-section { border-bottom-color: rgba(26,26,46,0.12); }
+        .profile-card.dark-text .info-icon { background: rgba(26,26,46,0.08); border-color: rgba(26,26,46,0.15); }
+        .profile-card.dark-text .info-row:hover,
+        .profile-card.dark-text .score-row:hover,
+        .profile-card.dark-text .contact-name:hover { background: rgba(26,26,46,0.06); }
+        .profile-card.dark-text .progress-bar { background: rgba(26,26,46,0.15); }
+        .profile-card.dark-text .inline-edit input,
+        .profile-card.dark-text .inline-edit select { background: rgba(26,26,46,0.08); border-color: rgba(26,26,46,0.2); color: #1a1a2e; }
+        .profile-card.dark-text .inline-edit input::placeholder { color: rgba(26,26,46,0.35); }
+        .profile-card.dark-text .edit-btn { background: rgba(26,26,46,0.12); color: #1a1a2e; }
+        .profile-card.dark-text .edit-btn.save { background: rgba(16,124,16,0.2); }
+        .profile-card.dark-text .edit-btn.cancel { background: rgba(209,52,56,0.15); }
+        .profile-card.dark-text .photo-placeholder { color: #1a1a2e; border-color: #a07030; }
+        .profile-card.dark-text .color-edit-btn { background: rgba(26,26,46,0.08); border-color: rgba(26,26,46,0.15); }
+        .profile-card.dark-text .color-edit-btn img { filter: brightness(0); }
+
+        /* ─── Loading / Error States ────────────── */
+        .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            gap: 12px;
+        }
+        .spinner {
+            width: 36px; height: 36px;
+            border: 3px solid rgba(255,255,255,0.2);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { font-size: 13px; color: var(--text-light); }
+        .error-state { padding: 32px; text-align: center; }
+        .error-state h3 { margin-bottom: 8px; }
+        .error-state p { color: var(--text-light); font-size: 13px; }
+
+        .hidden { display: none !important; }
+
+        /* ─── Header (Photo + Name) ─────────────── */
+        .header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+
+        .photo-wrapper {
+            position: relative;
+            width: 80px; height: 80px;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        .photo-wrapper:hover .photo-overlay { opacity: 1; }
+        .photo {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            border: 2.5px solid #d4a843;
+            object-fit: cover;
+            background: rgba(255,255,255,0.1);
+        }
+        .photo-placeholder {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            border: 2.5px solid #d4a843;
+            background: rgba(255,255,255,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-white);
+        }
+        .photo-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity var(--transition);
+        }
+        .photo-overlay svg { width: 22px; height: 22px; fill: #fff; }
+
+        .header-info { flex: 1; min-width: 0; }
+        .contact-name {
+            font-size: 22px;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.2px;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: background var(--transition);
+        }
+        .contact-name:hover { background: var(--edit-hover); }
+        .contact-location {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-top: 2px;
+        }
+
+        /* ─── Info Rows ─────────────────────────── */
+        .info-section {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding: 18px 0;
+            border-bottom: 1px solid var(--divider);
+        }
+        .info-section:last-child { border-bottom: none; }
+
+        .info-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 6px;
+            transition: background var(--transition);
+        }
+        .info-row:hover { background: var(--edit-hover); }
+
+        .info-icon {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: var(--icon-bg);
+            border: 1px solid var(--icon-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .info-icon svg { width: 16px; height: 16px; fill: var(--text-white); }
+
+        .info-content { flex: 1; min-width: 0; }
+        .info-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1px;
+        }
+        .info-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-white);
+            word-break: break-word;
+            white-space: pre-line;
+        }
+        .info-value.empty { color: var(--text-muted); font-style: italic; font-weight: 400; }
+
+        /* ─── Score Rows (with progress bars) ───── */
+        .score-section {
+            padding: 18px 0;
+            border-bottom: 1px solid var(--divider);
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .score-section:last-child { border-bottom: none; }
+
+        .score-row {
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 6px;
+            transition: background var(--transition);
+        }
+        .score-row:hover { background: var(--edit-hover); }
+
+        .score-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: var(--bar-track);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-left: 44px;
+            margin-right: 6px;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.6s ease;
+        }
+        .progress-fill.orange { background: var(--bar-fill); }
+        .progress-fill.green { background: var(--bar-fill-green); }
+
+        /* ─── Inline Edit ───────────────────────── */
+        .inline-edit {
+            display: none;
+            align-items: stretch;
+            gap: 6px;
+            width: 100%;
+        }
+        .inline-edit.active { display: flex; }
+        .inline-edit.stacked.active {
+            display: flex;
+            flex-direction: column;
+        }
+        .inline-edit.stacked .edit-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 2px;
+        }
+        .inline-edit input, .inline-edit select {
+            flex: 1;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 6px;
+            padding: 6px 10px;
+            color: #fff;
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+        }
+        .inline-edit input::placeholder { color: rgba(255,255,255,0.4); }
+        .inline-edit input:focus, .inline-edit select:focus {
+            border-color: rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.2);
+        }
+        .inline-edit select option { background: var(--option-bg, #2c7fb8); color: #fff; }
+        .edit-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            cursor: pointer;
+            padding: 6px 8px;
+            font-size: 12px;
+            transition: background var(--transition);
+        }
+        .edit-btn:hover { background: rgba(255,255,255,0.3); }
+        .edit-btn.save { background: rgba(76,217,100,0.4); }
+        .edit-btn.save:hover { background: rgba(76,217,100,0.6); }
+        .edit-btn.cancel { background: rgba(255,59,48,0.3); }
+        .edit-btn.cancel:hover { background: rgba(255,59,48,0.5); }
+
+        /* toast notification */
+        .toast {
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+            z-index: 1000;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* Hidden file input */
+        #photo-upload { display: none; }
+
+        /* ─── NPS & CSAT Header Pills ────────── */
+        .header-pills {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+        .header-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 9px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity var(--transition), transform var(--transition);
+            color: #fff;
+            background: rgba(255,255,255,0.18);
+            line-height: 1.4;
+            position: relative;
+        }
+        .header-pill:hover { opacity: 0.85; transform: scale(1.04); }
+        .header-pill .pill-label { opacity: 0.85; font-weight: 500; }
+        .header-pill .pill-val { font-weight: 700; }
+        .header-pill.empty {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-muted);
+            font-weight: 400;
+            font-style: italic;
+        }
+        .profile-card.dark-text .header-pill.empty {
+            background: rgba(26,26,46,0.06);
+            color: rgba(26,26,46,0.4);
+        }
+        .header-pill .pill-edit {
+            display: none;
+            align-items: center;
+            gap: 3px;
+        }
+        .header-pill .pill-edit.active {
+            display: inline-flex;
+        }
+        .header-pill .pill-edit input {
+            width: 48px;
+            padding: 1px 5px;
+            border: 1px solid rgba(255,255,255,0.4);
+            border-radius: 6px;
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            font-size: 11px;
+            font-family: inherit;
+            font-weight: 600;
+            outline: none;
+            text-align: center;
+        }
+        .header-pill .pill-edit input:focus {
+            border-color: rgba(255,255,255,0.7);
+            background: rgba(255,255,255,0.25);
+        }
+        .profile-card.dark-text .header-pill .pill-edit input {
+            background: rgba(26,26,46,0.08);
+            border-color: rgba(26,26,46,0.25);
+            color: #1a1a2e;
+        }
+        .header-pill .pill-edit button {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 0 2px;
+            line-height: 1;
+        }
+        .profile-card.dark-text .header-pill .pill-edit button { color: #1a1a2e; }
+
+        /* Loyalty dropdown styling */
+        .inline-edit select {
+            appearance: none;
+            -webkit-appearance: none;
+            background: rgba(255,255,255,0.15) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='white' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") no-repeat right 10px center;
+            background-size: 10px;
+            padding-right: 28px;
+        }
+
+        /* ─── Relationship Health Section ────── */
+        .rh-section {
+            padding: 18px 0;
+            border-bottom: 1px solid var(--divider);
+        }
+        .rh-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+        .rh-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-white);
+        }
+        .rh-info-icon {
+            width: 16px; height: 16px;
+            border-radius: 50%;
+            border: 1.5px solid var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: help;
+            flex-shrink: 0;
+        }
+        .rh-updated {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-left: auto;
+        }
+        .rh-status-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .rh-health-label {
+            font-size: 18px;
+            font-weight: 700;
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 12px;
+        }
+        .rh-health-label.good { background: rgba(0,60,0,0.75); color: #6ef28e; }
+        .rh-health-label.fair { background: rgba(80,50,0,0.75); color: #ffd06a; }
+        .rh-health-label.poor { background: rgba(80,10,10,0.75); color: #ff8a80; }
+        .profile-card.dark-text .rh-health-label.good { background: rgba(200,245,210,0.85); color: #0d6e1e; }
+        .profile-card.dark-text .rh-health-label.fair { background: rgba(255,240,200,0.85); color: #8a5600; }
+        .profile-card.dark-text .rh-health-label.poor { background: rgba(255,220,215,0.85); color: #a11b12; }
+        .rh-trend-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .rh-trend-badge.improving { background: rgba(0,60,0,0.7); color: #6ef28e; }
+        .rh-trend-badge.steady { background: rgba(0,40,80,0.7); color: #8ad8ff; }
+        .rh-trend-badge.declining { background: rgba(60,10,80,0.7); color: #d8a0f0; }
+        .profile-card.dark-text .rh-trend-badge.improving { background: rgba(200,245,210,0.85); color: #0d6e1e; }
+        .profile-card.dark-text .rh-trend-badge.steady { background: rgba(210,230,255,0.85); color: #004cb0; }
+        .profile-card.dark-text .rh-trend-badge.declining { background: rgba(240,215,255,0.85); color: #6a1e8a; }
+        .rh-trend-badge svg {
+            width: 14px; height: 14px;
+            fill: currentColor;
+        }
+        .rh-interaction {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 0;
+        }
+        .rh-interaction-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            min-width: 110px;
+        }
+        .rh-interaction-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-white);
+        }
+        .rh-no-data {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 6px 0;
+        }
+        .profile-card.dark-text .rh-title { color: #1a1a2e; }
+        .profile-card.dark-text .rh-info-icon { border-color: rgba(26,26,46,0.4); color: rgba(26,26,46,0.5); }
+        .profile-card.dark-text .rh-updated { color: rgba(26,26,46,0.5); }
+        .profile-card.dark-text .rh-interaction-label { color: rgba(26,26,46,0.5); }
+        .profile-card.dark-text .rh-interaction-value { color: #1a1a2e; }
+        .profile-card.dark-text .rh-no-data { color: rgba(26,26,46,0.4); }
+        .profile-card.dark-text .rh-section { border-bottom-color: rgba(26,26,46,0.12); }
+    </style>
+</head>
+<body>
+    <!-- Loading State -->
+    <div id="loading-screen" class="loading-state">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading profile...</div>
+    </div>
+
+    <!-- Error State -->
+    <div id="error-screen" class="error-state hidden">
+        <h3>Unable to load profile</h3>
+        <p id="error-message">Could not retrieve contact data.</p>
+    </div>
+
+    <!-- Color Picker Panel -->
+    <div id="color-picker-panel" class="color-picker-panel">
+        <button class="color-picker-close" id="color-picker-close" title="Close">&times;</button>
+        <h4>Card Theme</h4>
+        <div class="color-swatches" id="color-swatches"></div>
+        <div class="custom-color-row">
+            <label>Custom:</label>
+            <input type="color" id="custom-color-1" value="#1a6da5" />
+            <input type="color" id="custom-color-2" value="#2980b9" />
+            <button class="apply-custom-color" onclick="applyCustomColors()">Apply</button>
+        </div>
+        <div class="border-color-row">
+            <label>Photo border:</label>
+            <input type="color" id="border-color-picker" value="#d4a843" oninput="applyBorderColor(this.value)" />
+        </div>
+    </div>
+
+    <!-- Profile Card -->
+    <div id="profile-card" class="profile-card hidden">
+
+        <!-- Color edit button -->
+        <button class="color-edit-btn" id="color-edit-btn" title="Change card colors">
+            <img src="https://github.com/microsoft/fluentui-system-icons/raw/main/assets/Edit/SVG/ic_fluent_edit_48_regular.svg" alt="Edit" />
+        </button>
+
+        <!-- Header -->
+        <div class="header">
+            <div class="photo-wrapper" id="photo-wrapper" title="Click to change photo">
+                <div id="photo-placeholder" class="photo-placeholder"></div>
+                <img id="photo-img" class="photo hidden" alt="Contact photo" />
+                <div class="photo-overlay">
+                    <svg viewBox="0 0 24 24"><path d="M12 4a4 4 0 014 4v2h2a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2v-8a2 2 0 012-2h2V8a4 4 0 014-4zm5 8H7v6h10v-6zm-5-6a2 2 0 00-2 2v2h4V8a2 2 0 00-2-2z"/><path d="M3 4V1h2v3h3v2H5v3H3V6H0V4h3zm9 8c1.1 0 2 .9 2 2v1c0 1.1-.9 2-2 2s-2-.9-2-2v-1c0-1.1.9-2 2-2z" transform="translate(4,2) scale(0.75)"/></svg>
+                </div>
+                <input type="file" id="photo-upload" accept="image/*" />
+            </div>
+            <div class="header-info">
+                <div class="contact-name" id="contact-name" title="Click to edit"></div>
+                <div class="inline-edit" id="edit-name" style="margin-top:4px;">
+                    <input type="text" id="input-name" placeholder="Full name" />
+                    <button class="edit-btn save" onclick="saveNameInline()">&#10003;</button>
+                    <button class="edit-btn cancel" onclick="cancelEdit('contact-name','edit-name')">&#10007;</button>
+                </div>
+                <div class="contact-location" id="contact-location"></div>
+                <div class="header-pills">
+                    <span class="header-pill empty" id="pill-nps" title="Click to edit NPS">
+                        <span class="pill-label">NPS</span>
+                        <span class="pill-val" id="nps-pill-val">—</span>
+                        <span class="pill-edit" id="edit-pill-nps">
+                            <input type="number" id="input-pill-nps" min="0" max="10" placeholder="0-10" />
+                            <button onclick="savePillField('new_npsscore','input-pill-nps','pill-nps','edit-pill-nps',10)">&#10003;</button>
+                            <button onclick="cancelPillEdit('pill-nps','edit-pill-nps')">&#10007;</button>
+                        </span>
+                    </span>
+                    <span class="header-pill empty" id="pill-csat" title="Click to edit CSAT">
+                        <span class="pill-label">CSAT</span>
+                        <span class="pill-val" id="csat-pill-val">—</span>
+                        <span class="pill-edit" id="edit-pill-csat">
+                            <input type="number" id="input-pill-csat" min="0" max="100" placeholder="0-100" />
+                            <button onclick="savePillField('new_csatscore','input-pill-csat','pill-csat','edit-pill-csat',100)">&#10003;</button>
+                            <button onclick="cancelPillEdit('pill-csat','edit-pill-csat')">&#10007;</button>
+                        </span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Info Section -->
+        <div class="info-section">
+            <div class="info-row" data-field="cr4e0_customerid" data-type="string">
+                <div class="info-icon">
+                    <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12zM6 10h2v2H6v-2zm0 4h8v2H6v-2zm10-4h2v2h-2v-2zm-4 0h2v2h-2v-2z"/></svg>
+                </div>
+                <div class="info-content">
+                    <div class="info-label">Customer ID</div>
+                    <div class="info-value" id="val-customerid"></div>
+                    <div class="inline-edit" id="edit-customerid">
+                        <input type="text" id="input-customerid" placeholder="Enter Customer ID" />
+                        <button class="edit-btn save" onclick="saveField('cr4e0_customerid','input-customerid','val-customerid','edit-customerid','string')">&#10003;</button>
+                        <button class="edit-btn cancel" onclick="cancelEdit('val-customerid','edit-customerid')">&#10007;</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-row" data-field="emailaddress1" data-type="string">
+                <div class="info-icon">
+                    <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                </div>
+                <div class="info-content">
+                    <div class="info-label">Email Address</div>
+                    <div class="info-value" id="val-email"></div>
+                    <div class="inline-edit" id="edit-email">
+                        <input type="email" id="input-email" placeholder="Enter email address" />
+                        <button class="edit-btn save" onclick="saveField('emailaddress1','input-email','val-email','edit-email','string')">&#10003;</button>
+                        <button class="edit-btn cancel" onclick="cancelEdit('val-email','edit-email')">&#10007;</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-row" data-field="telephone1" data-type="string">
+                <div class="info-icon">
+                    <svg viewBox="0 0 24 24"><path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.27c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1C10.07 21 3 13.93 3 3.5a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.27 1.11l-2.37 2.3z"/></svg>
+                </div>
+                <div class="info-content">
+                    <div class="info-label">Phone Number</div>
+                    <div class="info-value" id="val-phone"></div>
+                    <div class="inline-edit" id="edit-phone">
+                        <input type="tel" id="input-phone" placeholder="Enter phone number" />
+                        <button class="edit-btn save" onclick="saveField('telephone1','input-phone','val-phone','edit-phone','string')">&#10003;</button>
+                        <button class="edit-btn cancel" onclick="cancelEdit('val-phone','edit-phone')">&#10007;</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-row" data-field="address1" data-type="address">
+                <div class="info-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1112 6.5a2.5 2.5 0 010 5z"/></svg>
+                </div>
+                <div class="info-content">
+                    <div class="info-label">Address</div>
+                    <div class="info-value" id="val-address"></div>
+                    <div class="inline-edit stacked" id="edit-address">
+                        <input type="text" id="input-address-line1" placeholder="Street" />
+                        <input type="text" id="input-address-city" placeholder="City" />
+                        <input type="text" id="input-address-state" placeholder="State / Province" />
+                        <input type="text" id="input-address-zip" placeholder="ZIP / Postal Code" />
+                        <input type="text" id="input-address-country" placeholder="Country / Region" />
+                        <div class="edit-actions">
+                            <button class="edit-btn save" onclick="saveAddress()">&#10003;</button>
+                            <button class="edit-btn cancel" onclick="cancelEdit('val-address','edit-address')">&#10007;</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loyalty & Segment Section -->
+        <div class="info-section">
+            <div class="info-row" data-field="cr4e0_loyaltytier" data-type="string">
+                <div class="info-icon" id="loyalty-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                </div>
+                <div class="info-content">
+                    <div class="info-label">Loyalty Tier</div>
+                    <div class="info-value" id="val-loyalty"></div>
+                    <div class="inline-edit" id="edit-loyalty">
+                        <select id="input-loyalty">
+                            <option value="">— Select Tier —</option>
+                            <option value="Diamond">💎 Diamond</option>
+                            <option value="Gold">🥇 Gold</option>
+                            <option value="Silver">🥈 Silver</option>
+                        </select>
+                        <button class="edit-btn save" onclick="saveLoyaltyTier()">&#10003;</button>
+                        <button class="edit-btn cancel" onclick="cancelEdit('val-loyalty','edit-loyalty')">&#10007;</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-row" data-field="cr4e0_segment" data-type="string">
+                <div class="info-icon">
+                    <svg viewBox="0 0 24 24"><path d="M18 11v2h4v-2h-4zm-2 6.61c.96.71 2.21 1.65 3.2 2.39.4-.53.8-1.07 1.2-1.6-.99-.74-2.24-1.68-3.2-2.4-.4.54-.8 1.08-1.2 1.61zM20.4 5.6c-.4-.53-.8-1.07-1.2-1.6-.99.74-2.24 1.68-3.2 2.4.4.53.8 1.07 1.2 1.6.96-.72 2.21-1.65 3.2-2.4zM4 9c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2h1v4h2v-4h1l5 3V6L8 9H4zm11.5 3c0-1.33-.58-2.53-1.5-3.35v6.69c.92-.81 1.5-2.01 1.5-3.34z"/></svg>
+                </div>
+                <div class="info-content">
+                    <div class="info-label">Segment</div>
+                    <div class="info-value" id="val-segment"></div>
+                    <div class="inline-edit" id="edit-segment">
+                        <input type="text" id="input-segment" placeholder="e.g., Urban Tech-Savvy" />
+                        <button class="edit-btn save" onclick="saveField('cr4e0_segment','input-segment','val-segment','edit-segment','string')">&#10003;</button>
+                        <button class="edit-btn cancel" onclick="cancelEdit('val-segment','edit-segment')">&#10007;</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Relationship Health Section -->
+        <div class="rh-section" id="rh-section" style="display:none;">
+            <div class="rh-header">
+                <span class="rh-title">Relationship health</span>
+                <span class="rh-info-icon" title="Powered by Relationship Analytics from Dynamics 365 Sales Insights">i</span>
+                <span class="rh-updated" id="rh-updated"></span>
+            </div>
+            <div class="rh-status-row" id="rh-status-row">
+                <span class="rh-health-label" id="rh-health-label"></span>
+                <span class="rh-trend-badge" id="rh-trend-badge"></span>
+            </div>
+            <div class="rh-interaction">
+                <span class="rh-interaction-label">Next interaction:</span>
+                <span class="rh-interaction-value" id="rh-next-interaction">Not Scheduled</span>
+            </div>
+            <div class="rh-interaction">
+                <span class="rh-interaction-label">Last interaction:</span>
+                <span class="rh-interaction-value" id="rh-last-interaction">Not Scheduled</span>
+            </div>
+        </div>
+
+        <!-- Scores Section -->
+        <div class="score-section">
+            <div class="score-row" data-field="cr4e0_lifetimevalue" data-type="money">
+                <div class="score-header">
+                    <div class="info-icon">
+                        <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+                    </div>
+                    <div class="info-content">
+                        <div class="info-label">Lifetime Value</div>
+                        <div class="info-value" id="val-ltv"></div>
+                        <div class="inline-edit" id="edit-ltv">
+                            <input type="number" id="input-ltv" placeholder="e.g., 65321" step="0.01" />
+                            <button class="edit-btn save" onclick="saveField('cr4e0_lifetimevalue','input-ltv','val-ltv','edit-ltv','money')">&#10003;</button>
+                            <button class="edit-btn cancel" onclick="cancelEdit('val-ltv','edit-ltv')">&#10007;</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="score-row" data-field="cr4e0_propensitytopurchase" data-type="integer">
+                <div class="score-header">
+                    <div class="info-icon">
+                        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg>
+                    </div>
+                    <div class="info-content">
+                        <div class="info-label">Propensity to Purchase</div>
+                        <div class="info-value" id="val-propensity"></div>
+                        <div class="inline-edit" id="edit-propensity">
+                            <input type="number" id="input-propensity" placeholder="0-100" min="0" max="100" />
+                            <button class="edit-btn save" onclick="saveField('cr4e0_propensitytopurchase','input-propensity','val-propensity','edit-propensity','integer')">&#10003;</button>
+                            <button class="edit-btn cancel" onclick="cancelEdit('val-propensity','edit-propensity')">&#10007;</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="progress-bar"><div class="progress-fill orange" id="bar-propensity"></div></div>
+            </div>
+
+            <div class="score-row" data-field="cr4e0_engagementscore" data-type="integer">
+                <div class="score-header">
+                    <div class="info-icon">
+                        <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6h-6z"/></svg>
+                    </div>
+                    <div class="info-content">
+                        <div class="info-label">Engagement Score</div>
+                        <div class="info-value" id="val-engagement"></div>
+                        <div class="inline-edit" id="edit-engagement">
+                            <input type="number" id="input-engagement" placeholder="0-100" min="0" max="100" />
+                            <button class="edit-btn save" onclick="saveField('cr4e0_engagementscore','input-engagement','val-engagement','edit-engagement','integer')">&#10003;</button>
+                            <button class="edit-btn cancel" onclick="cancelEdit('val-engagement','edit-engagement')">&#10007;</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="progress-bar"><div class="progress-fill green" id="bar-engagement"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // ─── Globals ────────────────────────────────────────────
+        let contactId = null;
+        let contactData = null;
+        let crmBaseUrl = "";
+
+        // ─── Xrm Context ───────────────────────────────────────
+        function getXrmContext() {
+            // Try to get context from parent form
+            if (window.parent && window.parent.Xrm && window.parent.Xrm.Page) {
+                return window.parent.Xrm;
+            }
+            if (window.parent && window.parent.Xrm && window.parent.Xrm.Utility) {
+                return window.parent.Xrm;
+            }
+            return null;
+        }
+
+        function getContactIdFromContext() {
+            // Method 1: Xrm.Page (classic)
+            try {
+                const xrm = getXrmContext();
+                if (xrm && xrm.Page && xrm.Page.data && xrm.Page.data.entity) {
+                    const id = xrm.Page.data.entity.getId();
+                    if (id) return id.replace(/[{}]/g, "");
+                }
+            } catch (e) { /* ignore */ }
+
+            // Method 2: URL query parameter
+            const params = new URLSearchParams(window.location.search);
+            const dataParam = params.get("data");
+            if (dataParam) {
+                try {
+                    const parsed = JSON.parse(decodeURIComponent(dataParam));
+                    if (parsed.id) return parsed.id.replace(/[{}]/g, "");
+                } catch (e) { /* ignore */ }
+            }
+            const idParam = params.get("id");
+            if (idParam) return idParam.replace(/[{}]/g, "");
+
+            // Method 3: Try parent URL
+            try {
+                const parentUrl = window.parent.location.href;
+                const match = parentUrl.match(/id=([0-9a-f-]{36})/i);
+                if (match) return match[1];
+            } catch (e) { /* cross-origin */ }
+
+            return null;
+        }
+
+        function getCrmBaseUrl() {
+            try {
+                const xrm = getXrmContext();
+                if (xrm && xrm.Utility && xrm.Utility.getGlobalContext) {
+                    return xrm.Utility.getGlobalContext().getClientUrl();
+                }
+                if (xrm && xrm.Page && xrm.Page.context) {
+                    return xrm.Page.context.getClientUrl();
+                }
+            } catch (e) { /* ignore */ }
+
+            // Fallback: derive from current URL
+            const origin = window.location.origin;
+            if (origin.includes(".dynamics.com") || origin.includes(".crm")) {
+                return origin;
+            }
+
+            // Hardcoded fallback
+            return "https://hyagom.crm.dynamics.com";
+        }
+
+        // ─── API Helpers ────────────────────────────────────────
+        async function crmApiFetch(url, options) {
+            const apiBase = crmBaseUrl + "/api/data/v9.2";
+            const defaults = {
+                headers: {
+                    "Accept": "application/json",
+                    "OData-MaxVersion": "4.0",
+                    "OData-Version": "4.0",
+                    "Content-Type": "application/json",
+                    "Prefer": 'odata.include-annotations="*"',
+                },
+            };
+            const merged = { ...defaults, ...options };
+            merged.headers = { ...defaults.headers, ...(options?.headers || {}) };
+
+            const res = await fetch(apiBase + url, merged);
+            if (!res.ok) {
+                const err = await res.text();
+                throw new Error("API error " + res.status + ": " + err);
+            }
+            if (res.status === 204) return null;
+            return res.json();
+        }
+
+        async function fetchContact() {
+            const select = [
+                "fullname", "firstname", "lastname",
+                "emailaddress1", "telephone1",
+                "address1_line1", "address1_city", "address1_stateorprovince", "address1_postalcode", "address1_country", "address1_composite",
+                "cr4e0_customerid", "cr4e0_loyaltytier", "cr4e0_segment",
+                "cr4e0_lifetimevalue", "cr4e0_propensitytopurchase", "cr4e0_engagementscore",
+                "entityimage_url",
+            ].join(",");
+
+            return await crmApiFetch("/contacts(" + contactId + ")?$select=" + select);
+        }
+
+        async function updateContact(fields) {
+            await crmApiFetch("/contacts(" + contactId + ")", {
+                method: "PATCH",
+                body: JSON.stringify(fields),
+            });
+        }
+
+        async function uploadEntityImage(contactId, base64Content) {
+            // Upload entity image via PATCH
+            await crmApiFetch("/contacts(" + contactId + ")", {
+                method: "PATCH",
+                body: JSON.stringify({ entityimage: base64Content }),
+            });
+        }
+
+        // ─── Rendering ─────────────────────────────────────────
+        function renderProfile(data) {
+            contactData = data;
+
+            // Name
+            document.getElementById("contact-name").textContent = data.fullname || "—";
+
+            // Location
+            const city = data.address1_city || "";
+            const state = data.address1_stateorprovince || "";
+            const location = [city, state].filter(Boolean).join(", ");
+            document.getElementById("contact-location").textContent = location || "";
+
+            // Photo
+            if (data.entityimage_url) {
+                const img = document.getElementById("photo-img");
+                img.src = crmBaseUrl + data.entityimage_url;
+                img.classList.remove("hidden");
+                document.getElementById("photo-placeholder").classList.add("hidden");
+            } else {
+                // Show initials
+                const initials = getInitials(data.fullname || "?");
+                document.getElementById("photo-placeholder").textContent = initials;
+                document.getElementById("photo-placeholder").classList.remove("hidden");
+                document.getElementById("photo-img").classList.add("hidden");
+            }
+
+            // Info fields
+            setFieldValue("val-customerid", data.cr4e0_customerid, "No Customer ID");
+            setFieldValue("val-email", data.emailaddress1, "No email");
+            setFieldValue("val-phone", data.telephone1, "No phone");
+
+            // Address
+            const addr = formatAddress(data);
+            setFieldValue("val-address", addr, "No address");
+
+            // NPS Score
+            renderHeaderPill('pill-nps', 'nps-pill-val', data.new_npsscore, 10);
+
+            // CSAT Score
+            renderHeaderPill('pill-csat', 'csat-pill-val', data.new_csatscore, 100);
+
+            // Loyalty & Segment
+            renderLoyaltyTier(data.cr4e0_loyaltytier);
+            setFieldValue("val-segment", data.cr4e0_segment, "Not set");
+
+            // Lifetime Value
+            const ltv = data.cr4e0_lifetimevalue;
+            if (ltv != null) {
+                setFieldValue("val-ltv", "$" + Number(ltv).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+            } else {
+                setFieldValue("val-ltv", null, "Not set");
+            }
+
+            // Propensity to Purchase
+            const propensity = data.cr4e0_propensitytopurchase;
+            if (propensity != null) {
+                setFieldValue("val-propensity", propensity + "%");
+                document.getElementById("bar-propensity").style.width = propensity + "%";
+            } else {
+                setFieldValue("val-propensity", null, "Not set");
+                document.getElementById("bar-propensity").style.width = "0%";
+            }
+
+            // Engagement Score
+            const engagement = data.cr4e0_engagementscore;
+            if (engagement != null) {
+                setFieldValue("val-engagement", engagement + "%");
+                document.getElementById("bar-engagement").style.width = engagement + "%";
+            } else {
+                setFieldValue("val-engagement", null, "Not set");
+                document.getElementById("bar-engagement").style.width = "0%";
+            }
+        }
+
+        function setFieldValue(elementId, value, emptyText) {
+            const el = document.getElementById(elementId);
+            if (value) {
+                el.textContent = value;
+                el.classList.remove("empty");
+            } else {
+                el.textContent = emptyText || "—";
+                el.classList.add("empty");
+            }
+        }
+
+        function getInitials(name) {
+            return name.split(" ").map(w => w.charAt(0).toUpperCase()).slice(0, 2).join("");
+        }
+
+        // ─── Header Pill helpers ────────────────────────────────
+        function renderHeaderPill(pillId, valId, value, max) {
+            const pill = document.getElementById(pillId);
+            const valEl = document.getElementById(valId);
+            if (value == null) {
+                valEl.textContent = "—";
+                pill.classList.add("empty");
+                pill.style.background = "";
+                pill.style.color = "";
+                return;
+            }
+            pill.classList.remove("empty");
+            const pct = value / max * 100;
+            let bg;
+            if (pct >= 80) bg = "#1a9a3e";
+            else if (pct >= 50) bg = "#c48400";
+            else bg = "#cc2d25";
+            pill.style.background = bg;
+            pill.style.color = "#fff";
+            valEl.textContent = max === 10 ? value + "/10" : value + "%";
+        }
+
+        function startPillEdit(pillId, editId, inputId, currentValue) {
+            const pill = document.getElementById(pillId);
+            const editEl = document.getElementById(editId);
+            const input = document.getElementById(inputId);
+            pill.querySelector(".pill-val").classList.add("hidden");
+            editEl.classList.add("active");
+            input.value = currentValue != null ? currentValue : "";
+            input.focus();
+        }
+
+        function cancelPillEdit(pillId, editId) {
+            const pill = document.getElementById(pillId);
+            const editEl = document.getElementById(editId);
+            pill.querySelector(".pill-val").classList.remove("hidden");
+            editEl.classList.remove("active");
+        }
+
+        async function savePillField(fieldName, inputId, pillId, editId, max) {
+            const input = document.getElementById(inputId);
+            const raw = input.value.trim();
+            const value = raw === "" ? null : parseInt(raw, 10);
+            if (value !== null && (isNaN(value) || value < 0 || value > max)) {
+                showToast("Value must be 0-" + max);
+                return;
+            }
+            try {
+                const obj = {};
+                obj[fieldName] = value;
+                await updateContact(obj);
+                const fresh = await fetchContact();
+                renderProfile(fresh);
+                cancelPillEdit(pillId, editId);
+                showToast("Updated successfully!");
+                try {
+                    const xrm = getXrmContext();
+                    if (xrm && xrm.Page && xrm.Page.data) xrm.Page.data.refresh(false);
+                } catch (e) { /* ignore */ }
+            } catch (err) {
+                showToast("Error: " + err.message);
+            }
+        }
+
+        function renderLoyaltyTier(tier) {
+            const el = document.getElementById("val-loyalty");
+            const iconEl = document.getElementById("loyalty-icon");
+            const heartSvg = iconEl.querySelector("svg");
+            const row = iconEl.closest(".info-row");
+            // Clear previous glow classes
+            if (row) {
+                row.classList.remove("loyalty-glow", "tier-diamond", "tier-gold", "tier-silver");
+            }
+            if (!tier) {
+                el.textContent = "Not set";
+                el.classList.add("empty");
+                el.className = "info-value empty";
+                iconEl.style.background = "";
+                iconEl.style.borderColor = "";
+                if (heartSvg) heartSvg.style.fill = "";
+                return;
+            }
+            el.classList.remove("empty");
+            const t = tier.toLowerCase();
+            let tierSymbol = "";
+            let cls = "";
+            let svgFill = "";
+            if (t === "diamond") { tierSymbol = "◆"; cls = "diamond"; svgFill = "#b9f2ff"; }
+            else if (t === "gold") { tierSymbol = "★"; cls = "gold"; svgFill = "#ffd700"; }
+            else if (t === "silver") { tierSymbol = "●"; cls = "silver"; svgFill = "#e0e0e0"; }
+            else { el.textContent = tier; return; }
+            // Style icon - transparent bg, colored SVG
+            iconEl.style.background = "transparent";
+            iconEl.style.borderColor = "transparent";
+            if (heartSvg) heartSvg.style.fill = svgFill;
+            // Add glow effect to the whole row
+            if (row) {
+                row.classList.add("loyalty-glow", "tier-" + t);
+            }
+            el.innerHTML = '<span class="loyalty-badge ' + cls + '"><span class="tier-icon">' + tierSymbol + '</span><span class="tier-text">' + tier + '</span></span>';
+        }
+
+        function formatAddress(data) {
+            const line1 = data.address1_line1 || "";
+            const city = data.address1_city || "";
+            const state = data.address1_stateorprovince || "";
+            const zip = data.address1_postalcode || "";
+            const country = data.address1_country || "";
+            const parts = [];
+            if (line1) parts.push(line1);
+            const cityState = [city, state].filter(Boolean).join(", ");
+            if (cityState) parts.push(cityState);
+            if (zip) parts.push(zip);
+            if (country) parts.push(country);
+            return parts.join("\n") || "";
+        }
+
+        // ─── Inline Editing ─────────────────────────────────────
+        function startEdit(valueId, editId, currentValue) {
+            const valEl = document.getElementById(valueId);
+            const editEl = document.getElementById(editId);
+            valEl.classList.add("hidden");
+            editEl.classList.add("active");
+
+            // Set the input value
+            const input = editEl.querySelector("input");
+            if (input) {
+                input.value = currentValue || "";
+                input.focus();
+            }
+        }
+
+        function cancelEdit(valueId, editId) {
+            document.getElementById(valueId).classList.remove("hidden");
+            const editEl = document.getElementById(editId);
+            editEl.classList.remove("active");
+        }
+
+        async function saveField(fieldName, inputId, valueId, editId, fieldType) {
+            const input = document.getElementById(inputId);
+            let newValue = input.value.trim();
+
+            // Convert types
+            const updateObj = {};
+            if (fieldType === "integer") {
+                updateObj[fieldName] = newValue === "" ? null : parseInt(newValue, 10);
+            } else if (fieldType === "money") {
+                updateObj[fieldName] = newValue === "" ? null : parseFloat(newValue);
+            } else {
+                updateObj[fieldName] = newValue || null;
+            }
+
+            try {
+                await updateContact(updateObj);
+                // Refresh the data
+                const fresh = await fetchContact();
+                renderProfile(fresh);
+                cancelEdit(valueId, editId);
+                showToast("Updated successfully!");
+                // Notify parent form to refresh
+                try {
+                    const xrm = getXrmContext();
+                    if (xrm && xrm.Page && xrm.Page.data) {
+                        xrm.Page.data.refresh(false);
+                    }
+                } catch (e) { /* ignore */ }
+            } catch (err) {
+                showToast("Error: " + err.message);
+            }
+        }
+
+        async function saveAddress() {
+            const line1 = document.getElementById("input-address-line1").value.trim();
+            const city = document.getElementById("input-address-city").value.trim();
+            const state = document.getElementById("input-address-state").value.trim();
+            const zip = document.getElementById("input-address-zip").value.trim();
+            const country = document.getElementById("input-address-country").value.trim();
+
+            try {
+                await updateContact({
+                    address1_line1: line1 || null,
+                    address1_city: city || null,
+                    address1_stateorprovince: state || null,
+                    address1_postalcode: zip || null,
+                    address1_country: country || null,
+                });
+                const fresh = await fetchContact();
+                renderProfile(fresh);
+                cancelEdit("val-address", "edit-address");
+                showToast("Address updated!");
+                try {
+                    const xrm = getXrmContext();
+                    if (xrm && xrm.Page && xrm.Page.data) xrm.Page.data.refresh(false);
+                } catch (e) { /* ignore */ }
+            } catch (err) {
+                showToast("Error: " + err.message);
+            }
+        }
+
+        async function saveLoyaltyTier() {
+            const select = document.getElementById("input-loyalty");
+            const newValue = select.value || null;
+            try {
+                await updateContact({ cr4e0_loyaltytier: newValue });
+                const fresh = await fetchContact();
+                renderProfile(fresh);
+                cancelEdit("val-loyalty", "edit-loyalty");
+                showToast("Loyalty tier updated!");
+                try {
+                    const xrm = getXrmContext();
+                    if (xrm && xrm.Page && xrm.Page.data) xrm.Page.data.refresh(false);
+                } catch (e) { /* ignore */ }
+            } catch (err) {
+                showToast("Error: " + err.message);
+            }
+        }
+
+        async function saveName(newName) {
+            if (!newName) return;
+            const parts = newName.trim().split(/\s+/);
+            const firstName = parts[0];
+            const lastName = parts.slice(1).join(" ") || "";
+
+            try {
+                await updateContact({ firstname: firstName, lastname: lastName });
+                const fresh = await fetchContact();
+                renderProfile(fresh);
+                showToast("Name updated!");
+                try {
+                    const xrm = getXrmContext();
+                    if (xrm && xrm.Page && xrm.Page.data) xrm.Page.data.refresh(false);
+                } catch (e) { /* ignore */ }
+            } catch (err) {
+                showToast("Error: " + err.message);
+            }
+        }
+
+        async function saveNameInline() {
+            const input = document.getElementById("input-name");
+            const val = input.value.trim();
+            if (!val) { showToast("Name cannot be empty"); return; }
+            await saveName(val);
+            cancelEdit("contact-name", "edit-name");
+        }
+
+        // ─── Photo Upload ───────────────────────────────────────
+        function setupPhotoUpload() {
+            const wrapper = document.getElementById("photo-wrapper");
+            const fileInput = document.getElementById("photo-upload");
+
+            wrapper.addEventListener("click", () => fileInput.click());
+
+            fileInput.addEventListener("change", async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                // Max 10MB
+                if (file.size > 10 * 1024 * 1024) {
+                    showToast("Image must be under 10MB");
+                    return;
+                }
+
+                try {
+                    showToast("Uploading photo...");
+                    const base64 = await fileToBase64(file);
+                    await uploadEntityImage(contactId, base64);
+                    const fresh = await fetchContact();
+                    renderProfile(fresh);
+                    showToast("Photo updated!");
+                } catch (err) {
+                    showToast("Error uploading photo: " + err.message);
+                }
+                // Reset input
+                fileInput.value = "";
+            });
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    // Remove data:image/xxx;base64, prefix
+                    const base64 = reader.result.split(",")[1];
+                    resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // ─── Click-to-Edit wiring ───────────────────────────────
+        function wireClickToEdit() {
+            // Info rows
+            document.querySelectorAll(".info-row").forEach(row => {
+                row.addEventListener("click", (e) => {
+                    // Don't trigger if clicking inside an edit form
+                    if (e.target.closest(".inline-edit")) return;
+
+                    const field = row.dataset.field;
+                    if (field === "address1") {
+                        // Pre-fill address fields
+                        document.getElementById("input-address-line1").value = contactData?.address1_line1 || "";
+                        document.getElementById("input-address-city").value = contactData?.address1_city || "";
+                        document.getElementById("input-address-state").value = contactData?.address1_stateorprovince || "";
+                        document.getElementById("input-address-zip").value = contactData?.address1_postalcode || "";
+                        document.getElementById("input-address-country").value = contactData?.address1_country || "";
+                        startEdit("val-address", "edit-address");
+                    } else if (field === "cr4e0_customerid") {
+                        startEdit("val-customerid", "edit-customerid", contactData?.cr4e0_customerid);
+                    } else if (field === "emailaddress1") {
+                        startEdit("val-email", "edit-email", contactData?.emailaddress1);
+                    } else if (field === "telephone1") {
+                        startEdit("val-phone", "edit-phone", contactData?.telephone1);
+                    } else if (field === "cr4e0_loyaltytier") {
+                        // Pre-select the current tier in the dropdown
+                        const sel = document.getElementById("input-loyalty");
+                        sel.value = contactData?.cr4e0_loyaltytier || "";
+                        startEdit("val-loyalty", "edit-loyalty");
+                    } else if (field === "cr4e0_segment") {
+                        startEdit("val-segment", "edit-segment", contactData?.cr4e0_segment);
+                    }
+                });
+            });
+
+            // Score rows
+            document.querySelectorAll(".score-row").forEach(row => {
+                row.addEventListener("click", (e) => {
+                    if (e.target.closest(".inline-edit")) return;
+
+                    const field = row.dataset.field;
+                    if (field === "cr4e0_lifetimevalue") {
+                        startEdit("val-ltv", "edit-ltv", contactData?.cr4e0_lifetimevalue);
+                    } else if (field === "cr4e0_propensitytopurchase") {
+                        startEdit("val-propensity", "edit-propensity", contactData?.cr4e0_propensitytopurchase);
+                    } else if (field === "cr4e0_engagementscore") {
+                        startEdit("val-engagement", "edit-engagement", contactData?.cr4e0_engagementscore);
+                    }
+                });
+            });
+
+            // Name click-to-edit
+            const nameEl = document.getElementById("contact-name");
+            nameEl.addEventListener("click", () => {
+                const currentName = contactData?.fullname || "";
+                startEdit("contact-name", "edit-name", currentName);
+            });
+
+            // NPS pill click-to-edit
+            document.getElementById("pill-nps").addEventListener("click", (e) => {
+                if (e.target.closest(".pill-edit")) return;
+                startPillEdit("pill-nps", "edit-pill-nps", "input-pill-nps", contactData?.new_npsscore);
+            });
+
+            // CSAT pill click-to-edit
+            document.getElementById("pill-csat").addEventListener("click", (e) => {
+                if (e.target.closest(".pill-edit")) return;
+                startPillEdit("pill-csat", "edit-pill-csat", "input-pill-csat", contactData?.new_csatscore);
+            });
+
+        }
+
+        // ─── Color Picker ────────────────────────────────────────
+        const COLOR_PRESETS = [
+            // Solid-feel gradients (dark bg → light text)
+            { name: "Ocean Blue", gradient: "linear-gradient(160deg, #1a6da5 0%, #2980b9 30%, #1f7bb5 60%, #1a6da5 100%)", textMode: "light" },
+            { name: "Royal Purple", gradient: "linear-gradient(160deg, #5b2c8e 0%, #7b4db5 30%, #6a3fa0 60%, #5b2c8e 100%)", textMode: "light" },
+            { name: "Forest Green", gradient: "linear-gradient(160deg, #1a7a4a 0%, #27ae60 30%, #1e8c52 60%, #1a7a4a 100%)", textMode: "light" },
+            { name: "Charcoal", gradient: "linear-gradient(160deg, #2c3e50 0%, #34495e 30%, #2c3e50 60%, #232d38 100%)", textMode: "light" },
+            // Faded / mixed modern
+            { name: "Sunset Fade", gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #f093fb 100%)", textMode: "light" },
+            { name: "Aurora", gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)", textMode: "light" },
+            { name: "Emerald Mist", gradient: "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)", textMode: "dark" },
+            { name: "Warm Dusk", gradient: "linear-gradient(135deg, #c94b4b 0%, #4b134f 100%)", textMode: "light" },
+            { name: "Peach Dream", gradient: "linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)", textMode: "dark" },
+            { name: "Cool Slate", gradient: "linear-gradient(135deg, #536976 0%, #292e49 100%)", textMode: "light" },
+            { name: "Berry", gradient: "linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)", textMode: "light" },
+            { name: "Nordic", gradient: "linear-gradient(135deg, #43cea2 0%, #185a9d 100%)", textMode: "light" },
+        ];
+
+        function setupColorPicker() {
+            const btn = document.getElementById("color-edit-btn");
+            const panel = document.getElementById("color-picker-panel");
+            const swatches = document.getElementById("color-swatches");
+
+            // Build swatches
+            COLOR_PRESETS.forEach((preset, i) => {
+                const swatch = document.createElement("div");
+                swatch.className = "color-swatch";
+                swatch.style.background = preset.gradient;
+                swatch.title = preset.name;
+                swatch.addEventListener("click", () => {
+                    applyCardGradient(preset.gradient, preset.textMode);
+                    document.querySelectorAll(".color-swatch").forEach(s => s.classList.remove("active"));
+                    swatch.classList.add("active");
+                });
+                swatches.appendChild(swatch);
+            });
+
+            // Toggle panel
+            btn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                panel.classList.toggle("open");
+            });
+
+            // Close when clicking outside
+            document.addEventListener("click", (e) => {
+                if (!panel.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+                    panel.classList.remove("open");
+                }
+            });
+
+            // Close button
+            document.getElementById("color-picker-close").addEventListener("click", () => {
+                panel.classList.remove("open");
+            });
+
+            // Restore saved color or apply default to set option bg
+            const saved = localStorage.getItem("contact360_cardGradient");
+            const savedMode = localStorage.getItem("contact360_textMode");
+            if (saved) {
+                applyCardGradient(saved, savedMode || "light");
+            } else {
+                // Apply default gradient so --option-bg gets set
+                const defaultGrad = getComputedStyle(document.documentElement).getPropertyValue("--card-bg").trim();
+                if (defaultGrad) applyCardGradient(defaultGrad);
+            }
+
+            // Restore saved border color
+            const savedBorder = localStorage.getItem("contact360_borderColor");
+            if (savedBorder) {
+                applyBorderColor(savedBorder);
+                document.getElementById("border-color-picker").value = savedBorder;
+            }
+        }
+
+        function applyCardGradient(gradient, textMode) {
+            const card = document.getElementById("profile-card");
+            card.style.background = gradient;
+            localStorage.setItem("contact360_cardGradient", gradient);
+
+            // Auto-detect text mode if not provided
+            if (!textMode) textMode = detectTextMode(gradient);
+            localStorage.setItem("contact360_textMode", textMode);
+
+            if (textMode === "dark") {
+                card.classList.add("dark-text");
+            } else {
+                card.classList.remove("dark-text");
+            }
+
+            // Update select option background to match card theme
+            const hexes = gradient.match(/#[0-9a-fA-F]{3,8}/gi) || [];
+            let optBg = "#2c7fb8";
+            if (hexes.length > 0) {
+                optBg = hexes[0];
+            } else {
+                // Try rgb() format
+                const rgbMatch = gradient.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+                if (rgbMatch) {
+                    optBg = "rgb(" + rgbMatch[1] + "," + rgbMatch[2] + "," + rgbMatch[3] + ")";
+                }
+            }
+            document.documentElement.style.setProperty("--option-bg", optBg);
+            // Also apply directly to all select options for browsers that ignore CSS vars on options
+            document.querySelectorAll(".inline-edit select option").forEach(function(opt) {
+                opt.style.backgroundColor = optBg;
+            });
+        }
+
+        function detectTextMode(gradient) {
+            // Extract hex colors from gradient string and compute average luminance
+            const hexes = gradient.match(/#[0-9a-fA-F]{6}/g) || [];
+            if (hexes.length === 0) return "light";
+            let totalLum = 0;
+            hexes.forEach(hex => {
+                const r = parseInt(hex.slice(1,3), 16);
+                const g = parseInt(hex.slice(3,5), 16);
+                const b = parseInt(hex.slice(5,7), 16);
+                // Relative luminance (perceptual)
+                totalLum += (0.299 * r + 0.587 * g + 0.114 * b);
+            });
+            const avgLum = totalLum / hexes.length;
+            // If average luminance > 160, background is light → use dark text
+            return avgLum > 160 ? "dark" : "light";
+        }
+
+        function applyCustomColors() {
+            const c1 = document.getElementById("custom-color-1").value;
+            const c2 = document.getElementById("custom-color-2").value;
+            const gradient = "linear-gradient(160deg, " + c1 + " 0%, " + c2 + " 100%)";
+            applyCardGradient(gradient); // auto-detect text mode
+            document.querySelectorAll(".color-swatch").forEach(s => s.classList.remove("active"));
+        }
+
+        function applyBorderColor(color) {
+            document.querySelectorAll(".photo, .photo-placeholder").forEach(el => {
+                el.style.borderColor = color;
+            });
+            localStorage.setItem("contact360_borderColor", color);
+        }
+
+        // ─── Toast ──────────────────────────────────────────────
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.classList.add("show");
+            setTimeout(() => toast.classList.remove("show"), 2500);
+        }
+
+        // ─── Relationship Health ─────────────────────────────────
+        const HEALTH_STATE_MAP = { 0: "Good", 1: "Fair", 2: "Poor", 3: "Not enough info", 4: "No Closed Activities", 5: "Computing...", 6: "Error", 7: "Too old" };
+        const HEALTH_STATE_CSS = { 0: "good", 1: "fair", 2: "poor" };
+        const HEALTH_TREND_MAP = { 0: "Improving", 1: "Steady", 2: "Declining", 3: "N/A", 4: "Error", 5: "N/A" };
+        const HEALTH_TREND_CSS = { 0: "improving", 1: "steady", 2: "declining" };
+        const TREND_ICONS = {
+            0: '<svg viewBox="0 0 24 24"><path d="M7 14l5-5 5 5z"/></svg>',
+            1: '<svg viewBox="0 0 24 24"><path d="M4 11h16v2H4z"/></svg>',
+            2: '<svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>',
+        };
+
+        async function fetchRelationshipHealth() {
+            try {
+                const data = await crmApiFetch("/msdyn_contactkpiitems?$filter=_msdyn_contactid_value eq " + contactId + "&$top=1&$select=msdyn_relationshiphealthscorestate,msdyn_relationshiphealthscorevalue,msdyn_relationshiphealthtrend,modifiedon");
+                return data && data.value && data.value.length > 0 ? data.value[0] : null;
+            } catch (e) { return null; }
+        }
+
+        async function fetchNextInteraction() {
+            try {
+                const now = new Date().toISOString();
+                const data = await crmApiFetch("/activitypointers?$filter=_regardingobjectid_value eq " + contactId + " and scheduledstart gt " + now + " and statecode eq 0&$orderby=scheduledstart asc&$top=1&$select=subject,scheduledstart,activitytypecode");
+                return data && data.value && data.value.length > 0 ? data.value[0] : null;
+            } catch (e) { return null; }
+        }
+
+        async function fetchLastInteraction() {
+            try {
+                const data = await crmApiFetch("/activitypointers?$filter=_regardingobjectid_value eq " + contactId + " and statecode eq 1&$orderby=actualend desc&$top=1&$select=subject,actualend,activitytypecode");
+                return data && data.value && data.value.length > 0 ? data.value[0] : null;
+            } catch (e) { return null; }
+        }
+
+        function renderRelationshipHealth(kpi, nextAct, lastAct) {
+            const section = document.getElementById("rh-section");
+            if (!kpi) { section.style.display = "none"; return; }
+
+            section.style.display = "";
+            const state = kpi.msdyn_relationshiphealthscorestate;
+            const trend = kpi.msdyn_relationshiphealthtrend;
+
+            // Health label
+            const label = document.getElementById("rh-health-label");
+            label.textContent = HEALTH_STATE_MAP[state] || "Unknown";
+            label.className = "rh-health-label " + (HEALTH_STATE_CSS[state] || "");
+
+            // Trend badge
+            const badge = document.getElementById("rh-trend-badge");
+            if (trend != null && HEALTH_TREND_MAP[trend] && trend <= 2) {
+                badge.innerHTML = (TREND_ICONS[trend] || "") + HEALTH_TREND_MAP[trend];
+                badge.className = "rh-trend-badge " + (HEALTH_TREND_CSS[trend] || "");
+                badge.style.display = "";
+            } else {
+                badge.style.display = "none";
+            }
+
+            // Last updated
+            const updated = kpi.modifiedon;
+            if (updated) {
+                const d = new Date(updated);
+                document.getElementById("rh-updated").textContent = "Last updated:" + d.toLocaleDateString("en-US") + " " + d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+            }
+
+            // Next interaction
+            const nextEl = document.getElementById("rh-next-interaction");
+            if (nextAct && nextAct.scheduledstart) {
+                const nd = new Date(nextAct.scheduledstart);
+                nextEl.textContent = nd.toLocaleDateString("en-US") + " — " + (nextAct.subject || nextAct.activitytypecode);
+            } else {
+                nextEl.textContent = "Not Scheduled";
+            }
+
+            // Last interaction
+            const lastEl = document.getElementById("rh-last-interaction");
+            if (lastAct && lastAct.actualend) {
+                const ld = new Date(lastAct.actualend);
+                lastEl.textContent = ld.toLocaleDateString("en-US") + " — " + (lastAct.subject || lastAct.activitytypecode);
+            } else {
+                lastEl.textContent = "Not Scheduled";
+            }
+        }
+
+        // ─── Init ───────────────────────────────────────────────
+        async function init() {
+            crmBaseUrl = getCrmBaseUrl();
+            contactId = getContactIdFromContext();
+
+            if (!contactId) {
+                document.getElementById("loading-screen").classList.add("hidden");
+                document.getElementById("error-screen").classList.remove("hidden");
+                document.getElementById("error-message").textContent = "No contact ID found. This web resource must be placed on a Contact form.";
+                return;
+            }
+
+            try {
+                const data = await fetchContact();
+                document.getElementById("loading-screen").classList.add("hidden");
+                document.getElementById("profile-card").classList.remove("hidden");
+                renderProfile(data);
+                wireClickToEdit();
+                setupPhotoUpload();
+                setupColorPicker();
+
+                // Load Relationship Health data in parallel
+                Promise.all([fetchRelationshipHealth(), fetchNextInteraction(), fetchLastInteraction()])
+                    .then(([kpi, nextAct, lastAct]) => renderRelationshipHealth(kpi, nextAct, lastAct))
+                    .catch(() => {});
+            } catch (err) {
+                document.getElementById("loading-screen").classList.add("hidden");
+                document.getElementById("error-screen").classList.remove("hidden");
+                document.getElementById("error-message").textContent = err.message;
+            }
+        }
+
+        // Wait for DOM
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
+
