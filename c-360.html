@@ -448,6 +448,7 @@
             transition: background var(--transition), transform 0.15s ease;
         }
         .opp-metric-card:hover { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+        .opp-metric-card.won, .opp-metric-card.lost { cursor: pointer; }
         .opp-metric-icon {
             width: 28px; height: 28px;
             margin: 0 auto 8px;
@@ -522,7 +523,11 @@
             align-items: center;
             padding: 6px 0;
             border-bottom: 1px solid rgba(255,255,255,0.06);
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background 0.15s ease;
         }
+        .opp-popup-item:hover { background: rgba(255,255,255,0.08); }
         .opp-popup-item:last-child { border-bottom: none; }
         .opp-popup-name {
             font-size: 12px;
@@ -540,6 +545,8 @@
             color: #4cd964;
             flex-shrink: 0;
         }
+        .opp-popup-value.lost-value { color: #ff8a80; }
+        .profile-card.dark-text .opp-popup-value.lost-value { color: #a11b12; }
         .opp-popup-empty {
             font-size: 12px;
             color: var(--text-muted);
@@ -554,6 +561,7 @@
         .profile-card.dark-text .opp-popup-name { color: #1a1a2e; }
         .profile-card.dark-text .opp-popup-value { color: #0d6e1e; }
         .profile-card.dark-text .opp-popup-item { border-bottom-color: rgba(26,26,46,0.08); }
+        .profile-card.dark-text .opp-popup-item:hover { background: rgba(26,26,46,0.06); }
         .profile-card.dark-text .opp-popup-empty { color: rgba(26,26,46,0.4); }
         /* Dark text overrides */
         .profile-card.dark-text .opp-metric-card { background: rgba(26,26,46,0.06); border-color: rgba(26,26,46,0.12); }
@@ -1044,14 +1052,14 @@
                 <div id="opp-popup-list"></div>
             </div>
             <div class="opp-metrics-row">
-                <div class="opp-metric-card won">
+                <div class="opp-metric-card won" id="opp-card-won">
                     <div class="opp-metric-icon">
                         <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                     </div>
                     <div class="opp-metric-number" id="val-won">—</div>
                     <div class="opp-metric-label">Closed Won</div>
                 </div>
-                <div class="opp-metric-card lost">
+                <div class="opp-metric-card lost" id="opp-card-lost">
                     <div class="opp-metric-icon">
                         <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
                     </div>
@@ -1065,6 +1073,14 @@
                     <div class="opp-metric-number" id="val-winratio">—</div>
                     <div class="opp-metric-label">Win Ratio</div>
                 </div>
+            </div>
+            <div class="opp-popup" id="opp-popup-won">
+                <div class="opp-popup-title">Closed Won Opportunities</div>
+                <div id="opp-popup-won-list"></div>
+            </div>
+            <div class="opp-popup" id="opp-popup-lost">
+                <div class="opp-popup-title">Closed Lost Opportunities</div>
+                <div id="opp-popup-lost-list"></div>
             </div>
         </div>
     </div>
@@ -1760,8 +1776,34 @@
                 const winRatio = closed > 0 ? Math.round((won.length / closed) * 100) : null;
                 const openValue = open.reduce((sum, o) => sum + (o.estimatedvalue || 0), 0);
 
-                return { won: won.length, lost: lost.length, winRatio, openCount: open.length, openValue, openOpps: open };
+                return { won: won.length, lost: lost.length, winRatio, openCount: open.length, openValue, openOpps: open, wonOpps: won, lostOpps: lost };
             } catch (e) { return null; }
+        }
+
+        function navigateToOpportunity(oppId) {
+            try {
+                var xrm = getXrmContext();
+                if (xrm && xrm.Navigation && xrm.Navigation.openForm) {
+                    xrm.Navigation.openForm({ entityName: "opportunity", entityId: oppId });
+                    return;
+                }
+            } catch (e) {}
+            // Fallback: navigate in parent window
+            var url = crmBaseUrl + "/main.aspx?etn=opportunity&id=" + oppId + "&pagetype=entityrecord";
+            window.top.location.href = url;
+        }
+
+        function buildOppListHtml(opps, valueField, valueClass) {
+            if (!opps || opps.length === 0) return '<div class="opp-popup-empty">None</div>';
+            return opps.map(function(o) {
+                var rawVal = o[valueField] != null ? o[valueField] : o.estimatedvalue;
+                var val = rawVal != null ? "$" + rawVal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—";
+                var name = o.name || "Unnamed Opportunity";
+                var cls = valueClass ? ' ' + valueClass : '';
+                return '<div class="opp-popup-item" data-oppid="' + o.opportunityid + '" onclick="navigateToOpportunity(\'' + o.opportunityid + '\')">' +
+                    '<span class="opp-popup-name" title="' + name.replace(/"/g, '&quot;') + '">' + name + '</span>' +
+                    '<span class="opp-popup-value' + cls + '">' + val + '</span></div>';
+            }).join("");
         }
 
         function renderOpportunityMetrics(metrics) {
@@ -1770,44 +1812,80 @@
             document.getElementById("val-won").textContent = metrics.won;
             document.getElementById("val-lost").textContent = metrics.lost;
 
-            const ratioEl = document.getElementById("val-winratio");
+            var ratioEl = document.getElementById("val-winratio");
             if (metrics.winRatio != null) {
                 ratioEl.textContent = metrics.winRatio + "%";
             } else {
                 ratioEl.textContent = "N/A";
             }
 
-            const impactEl = document.getElementById("val-opp-impact");
-            const countEl = document.getElementById("val-opp-impact-count");
-            const popupList = document.getElementById("opp-popup-list");
+            // Open opportunities popup
+            var impactEl = document.getElementById("val-opp-impact");
+            var countEl = document.getElementById("val-opp-impact-count");
+            var popupList = document.getElementById("opp-popup-list");
 
             if (metrics.openCount > 0) {
                 impactEl.textContent = "$" + metrics.openValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 impactEl.classList.remove("empty");
                 countEl.textContent = metrics.openCount + " open " + (metrics.openCount === 1 ? "opportunity" : "opportunities");
-
-                popupList.innerHTML = metrics.openOpps.map(function(o) {
-                    var val = o.estimatedvalue != null ? "$" + o.estimatedvalue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—";
-                    var name = o.name || "Unnamed Opportunity";
-                    return '<div class="opp-popup-item"><span class="opp-popup-name" title="' + name.replace(/"/g, '&quot;') + '">' + name + '</span><span class="opp-popup-value">' + val + '</span></div>';
-                }).join("");
+                popupList.innerHTML = buildOppListHtml(metrics.openOpps, "estimatedvalue", "");
             } else {
                 impactEl.textContent = "No open opportunities";
                 impactEl.classList.add("empty");
                 countEl.textContent = "";
                 popupList.innerHTML = '<div class="opp-popup-empty">No open opportunities</div>';
             }
+
+            // Won popup
+            document.getElementById("opp-popup-won-list").innerHTML = buildOppListHtml(metrics.wonOpps, "actualvalue", "");
+
+            // Lost popup
+            document.getElementById("opp-popup-lost-list").innerHTML = buildOppListHtml(metrics.lostOpps, "estimatedvalue", "lost-value");
         }
 
-        // Toggle popup on click
+        // Popup toggle logic with mutual exclusion
         (function() {
+            var popupMap = {
+                "opp-impact-row": "opp-popup",
+                "opp-card-won": "opp-popup-won",
+                "opp-card-lost": "opp-popup-lost"
+            };
+            var allPopupIds = ["opp-popup", "opp-popup-won", "opp-popup-lost"];
+
+            function closeAllPopups(except) {
+                allPopupIds.forEach(function(id) {
+                    if (id !== except) {
+                        var el = document.getElementById(id);
+                        if (el) el.classList.remove("open");
+                    }
+                });
+            }
+
             document.addEventListener("click", function(e) {
-                var row = document.getElementById("opp-impact-row");
-                var popup = document.getElementById("opp-popup");
-                if (row && row.contains(e.target)) {
-                    popup.classList.toggle("open");
-                } else if (popup && !popup.contains(e.target)) {
-                    popup.classList.remove("open");
+                // Check if click is on a popup item with navigation
+                if (e.target.closest(".opp-popup-item[data-oppid]")) return;
+
+                // Check if click is on a trigger
+                var triggered = false;
+                Object.keys(popupMap).forEach(function(triggerId) {
+                    var trigger = document.getElementById(triggerId);
+                    if (trigger && trigger.contains(e.target)) {
+                        var popupId = popupMap[triggerId];
+                        var popup = document.getElementById(popupId);
+                        var isOpen = popup.classList.contains("open");
+                        closeAllPopups();
+                        if (!isOpen) popup.classList.add("open");
+                        triggered = true;
+                    }
+                });
+
+                // Click outside — close all
+                if (!triggered) {
+                    var insidePopup = allPopupIds.some(function(id) {
+                        var el = document.getElementById(id);
+                        return el && el.contains(e.target);
+                    });
+                    if (!insidePopup) closeAllPopups();
                 }
             });
         })();
