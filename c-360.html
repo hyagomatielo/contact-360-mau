@@ -1182,23 +1182,7 @@
             </div>
         </div>
 
-        <!-- Segment Section -->
-        <div class="info-section">
-            <div class="info-row" data-field="cr4e0_segment" data-type="string">
-                <div class="info-icon">
-                    <svg viewBox="0 0 24 24"><path d="M18 11v2h4v-2h-4zm-2 6.61c.96.71 2.21 1.65 3.2 2.39.4-.53.8-1.07 1.2-1.6-.99-.74-2.24-1.68-3.2-2.4-.4.54-.8 1.08-1.2 1.61zM20.4 5.6c-.4-.53-.8-1.07-1.2-1.6-.99.74-2.24 1.68-3.2 2.4.4.53.8 1.07 1.2 1.6.96-.72 2.21-1.65 3.2-2.4zM4 9c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2h1v4h2v-4h1l5 3V6L8 9H4zm11.5 3c0-1.33-.58-2.53-1.5-3.35v6.69c.92-.81 1.5-2.01 1.5-3.34z"/></svg>
-                </div>
-                <div class="info-content">
-                    <div class="info-label">Segment</div>
-                    <div class="info-value" id="val-segment"></div>
-                    <div class="inline-edit" id="edit-segment">
-                        <input type="text" id="input-segment" placeholder="e.g., Urban Tech-Savvy" />
-                        <button class="edit-btn save" onclick="saveField('cr4e0_segment','input-segment','val-segment','edit-segment','string')">&#10003;</button>
-                        <button class="edit-btn cancel" onclick="cancelEdit('val-segment','edit-segment')">&#10007;</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+
 
         <!-- Relationship Health Section -->
         <div class="rh-section" id="rh-section" style="display:none;">
@@ -1426,7 +1410,7 @@
                 "fullname", "firstname", "lastname",
                 "emailaddress1", "telephone1",
                 "address1_line1", "address1_city", "address1_stateorprovince", "address1_postalcode", "address1_country", "address1_composite",
-                "cr4e0_customerid", "cr4e0_loyaltytier", "cr4e0_segment",
+                "cr4e0_customerid", "cr4e0_loyaltytier",
                 "jobtitle",
                 "entityimage_url",
             ].join(",");
@@ -1501,9 +1485,8 @@
             // CSAT Score
             renderHeaderPill('pill-csat', 'csat-pill-val', data.new_csatscore, 100);
 
-            // Loyalty & Segment
+            // Loyalty
             renderLoyaltyTier(data.cr4e0_loyaltytier);
-            setFieldValue("val-segment", data.cr4e0_segment, "Not set");
 
 
         }
@@ -1843,8 +1826,6 @@
                         startEdit("val-email", "edit-email", contactData?.emailaddress1);
                     } else if (field === "telephone1") {
                         startEdit("val-phone", "edit-phone", contactData?.telephone1);
-                    } else if (field === "cr4e0_segment") {
-                        startEdit("val-segment", "edit-segment", contactData?.cr4e0_segment);
                     }
                 });
             });
