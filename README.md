@@ -2,24 +2,30 @@
 
 A rich, visual contact profile card designed to be embedded directly inside Microsoft Dynamics 365 Sales forms. It gives sales reps and account managers a **single-glance view** of everything they need to know about a contact — right on the record.
 
+## Screenshots
+
+| Sales Tab | Service Tab |
+|:---------:|:-----------:|
+| ![Sales Tab](img/sales-tab.png) | ![Service Tab](img/service-tab.png) |
+
 ## What It Does
 
 When you open a Contact record in Dynamics 365, this card appears and automatically displays:
 
 - **Contact photo & name** — with the ability to upload or change the photo directly from the card.
-- **Key details** — email, phone, address, Customer ID, loyalty tier, and segment.
-- **NPS & CSAT scores** — quick satisfaction indicators shown as header badges.
+- **Loyalty tier pill** — Diamond, Gold, and Silver tiers displayed as an animated shimmer badge next to the contact name.
+- **Key details** — email, phone, address, Customer ID, and role/job title.
+- **NPS & CSAT scores** — quick satisfaction indicators shown as header pills.
 - **Relationship Health** — powered by Dynamics 365 Sales Insights, showing the current health status (Good / Fair / Poor), trend direction (Improving / Steady / Declining), and the next and last scheduled interactions.
-- **Lifetime Value** — the total monetary value of the customer relationship.
-- **Propensity to Purchase** — a score indicating how likely the contact is to buy.
-- **Engagement Score** — how actively engaged the contact is with your organization.
+- **Sales tab** — current opportunity impact, open opportunities (clickable), closed won/lost counts, and win ratio.
+- **Service tab** — open cases, resolved and cancelled case counts, with clickable case details.
 
 ### Visual Highlights
 
 - **Loyalty tier badges** — Diamond, Gold, and Silver tiers each have their own animated shimmer effect.
 - **Color customization** — a built-in color picker lets you personalize the card's background and text colors.
 - **Inline editing** — click on any editable field to update it directly, without leaving the card. Changes save back to Dynamics 365 instantly.
-- **Progress bars** — engagement and propensity scores are displayed with color-coded bars for quick visual assessment.
+- **Clickable navigation** — click on opportunities or cases to open them directly in Dynamics 365.
 
 ## How to Use It
 
@@ -32,5 +38,5 @@ No additional servers, databases, or installations are required. Everything runs
 ## Requirements
 
 - Microsoft Dynamics 365 Sales (online)
-- The custom fields referenced in the card (e.g., Lifetime Value, Engagement Score, Propensity to Purchase, Loyalty Tier, Segment) must exist on the Contact entity in your environment
+- The custom fields referenced in the card (e.g., Loyalty Tier, Customer ID) must exist on the Contact entity in your environment
 - For Relationship Health data, **Sales Insights** must be enabled in your Dynamics 365 environment
