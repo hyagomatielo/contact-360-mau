@@ -838,6 +838,102 @@
         .profile-card.dark-text .contact-role { color: rgba(26,26,46,0.65); }
         .profile-card.dark-text .contact-role.empty { color: rgba(26,26,46,0.4); }
 
+        /* ─── Loyalty Tier Pill (header) ──────── */
+        .name-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .loyalty-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 12px;
+            border-radius: 14px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity var(--transition), transform var(--transition), background var(--transition);
+            white-space: nowrap;
+            flex-shrink: 0;
+            position: relative;
+            line-height: 1.5;
+        }
+        .loyalty-pill:hover { opacity: 0.85; transform: scale(1.04); }
+        .loyalty-pill .tier-icon { font-size: 14px; }
+        .loyalty-pill.empty {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-muted);
+            font-weight: 500;
+            font-style: italic;
+            border: 1px dashed rgba(255,255,255,0.25);
+        }
+        .loyalty-pill.diamond {
+            background: rgba(185,242,255,0.18);
+            border: 1px solid rgba(185,242,255,0.35);
+            color: #b9f2ff;
+            text-shadow: 0 0 6px rgba(185,242,255,0.5);
+        }
+        .loyalty-pill.gold {
+            background: rgba(255,215,0,0.18);
+            border: 1px solid rgba(255,215,0,0.35);
+            color: #ffd700;
+            text-shadow: 0 0 6px rgba(255,215,0,0.4);
+        }
+        .loyalty-pill.silver {
+            background: rgba(224,224,224,0.18);
+            border: 1px solid rgba(224,224,224,0.35);
+            color: #e0e0e0;
+            text-shadow: 0 0 4px rgba(224,224,224,0.3);
+        }
+        .profile-card.dark-text .loyalty-pill.empty { background: rgba(26,26,46,0.06); border-color: rgba(26,26,46,0.2); color: rgba(26,26,46,0.4); }
+        .profile-card.dark-text .loyalty-pill.diamond { background: rgba(0,180,220,0.12); border-color: rgba(0,180,220,0.3); color: #007a8c; text-shadow: none; }
+        .profile-card.dark-text .loyalty-pill.gold { background: rgba(180,140,0,0.12); border-color: rgba(180,140,0,0.3); color: #8a6d00; text-shadow: none; }
+        .profile-card.dark-text .loyalty-pill.silver { background: rgba(100,100,100,0.12); border-color: rgba(100,100,100,0.3); color: #555; text-shadow: none; }
+        .loyalty-pill .loyalty-edit {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 6px;
+            background: rgba(12,12,25,0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 10px;
+            padding: 8px;
+            z-index: 50;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+            min-width: 170px;
+        }
+        .loyalty-pill .loyalty-edit.open { display: flex; gap: 4px; }
+        .profile-card.dark-text .loyalty-pill .loyalty-edit {
+            background: rgba(255,255,255,0.95);
+            border-color: rgba(26,26,46,0.15);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        .loyalty-pill .loyalty-edit select {
+            flex: 1;
+            appearance: none;
+            -webkit-appearance: none;
+            background: rgba(255,255,255,0.15) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='white' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") no-repeat right 10px center;
+            background-size: 10px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 6px;
+            padding: 6px 28px 6px 10px;
+            color: #fff;
+            font-size: 12px;
+            font-family: inherit;
+            outline: none;
+        }
+        .loyalty-pill .loyalty-edit select:focus { border-color: rgba(255,255,255,0.6); }
+        .loyalty-pill .loyalty-edit select option { background: var(--option-bg, #2c7fb8); color: #fff; }
+        .profile-card.dark-text .loyalty-pill .loyalty-edit select {
+            background-color: rgba(26,26,46,0.08);
+            border-color: rgba(26,26,46,0.2);
+            color: #1a1a2e;
+        }
+        .profile-card.dark-text .loyalty-pill .loyalty-edit select option { background: #f0f0f0; color: #1a1a2e; }
+
         /* ─── Tab System ─────────────────────── */
         .tab-bar {
             display: flex;
@@ -970,7 +1066,23 @@
                 <input type="file" id="photo-upload" accept="image/*" />
             </div>
             <div class="header-info">
-                <div class="contact-name" id="contact-name" title="Click to edit"></div>
+                <div class="name-row">
+                    <div class="contact-name" id="contact-name" title="Click to edit"></div>
+                    <span class="loyalty-pill empty" id="loyalty-pill" title="Click to edit loyalty tier">
+                        <span class="tier-icon"></span>
+                        <span class="tier-text">Not set</span>
+                        <div class="loyalty-edit" id="loyalty-edit">
+                            <select id="input-loyalty">
+                                <option value="">— Select Tier —</option>
+                                <option value="Diamond">💎 Diamond</option>
+                                <option value="Gold">🥇 Gold</option>
+                                <option value="Silver">🥈 Silver</option>
+                            </select>
+                            <button class="edit-btn save" onclick="saveLoyaltyTier()">&#10003;</button>
+                            <button class="edit-btn cancel" onclick="cancelLoyaltyEdit()">&#10007;</button>
+                        </div>
+                    </span>
+                </div>
                 <div class="inline-edit" id="edit-name" style="margin-top:4px;">
                     <input type="text" id="input-name" placeholder="Full name" />
                     <button class="edit-btn save" onclick="saveNameInline()">&#10003;</button>
@@ -1070,28 +1182,8 @@
             </div>
         </div>
 
-        <!-- Loyalty & Segment Section -->
+        <!-- Segment Section -->
         <div class="info-section">
-            <div class="info-row" data-field="cr4e0_loyaltytier" data-type="string">
-                <div class="info-icon" id="loyalty-icon">
-                    <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                </div>
-                <div class="info-content">
-                    <div class="info-label">Loyalty Tier</div>
-                    <div class="info-value" id="val-loyalty"></div>
-                    <div class="inline-edit" id="edit-loyalty">
-                        <select id="input-loyalty">
-                            <option value="">— Select Tier —</option>
-                            <option value="Diamond">💎 Diamond</option>
-                            <option value="Gold">🥇 Gold</option>
-                            <option value="Silver">🥈 Silver</option>
-                        </select>
-                        <button class="edit-btn save" onclick="saveLoyaltyTier()">&#10003;</button>
-                        <button class="edit-btn cancel" onclick="cancelEdit('val-loyalty','edit-loyalty')">&#10007;</button>
-                    </div>
-                </div>
-            </div>
-
             <div class="info-row" data-field="cr4e0_segment" data-type="string">
                 <div class="info-icon">
                     <svg viewBox="0 0 24 24"><path d="M18 11v2h4v-2h-4zm-2 6.61c.96.71 2.21 1.65 3.2 2.39.4-.53.8-1.07 1.2-1.6-.99-.74-2.24-1.68-3.2-2.4-.4.54-.8 1.08-1.2 1.61zM20.4 5.6c-.4-.53-.8-1.07-1.2-1.6-.99.74-2.24 1.68-3.2 2.4.4.53.8 1.07 1.2 1.6.96-.72 2.21-1.65 3.2-2.4zM4 9c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2h1v4h2v-4h1l5 3V6L8 9H4zm11.5 3c0-1.33-.58-2.53-1.5-3.35v6.69c.92-.81 1.5-2.01 1.5-3.34z"/></svg>
@@ -1496,35 +1588,44 @@
         }
 
         function renderLoyaltyTier(tier) {
-            const el = document.getElementById("val-loyalty");
-            const iconEl = document.getElementById("loyalty-icon");
-            const heartSvg = iconEl.querySelector("svg");
-            const row = iconEl.closest(".info-row");
+            var pill = document.getElementById("loyalty-pill");
+            var iconEl = pill.querySelector(".tier-icon");
+            var textEl = pill.querySelector(".tier-text");
+
+            // Reset classes
+            pill.className = "loyalty-pill";
 
             if (!tier) {
-                el.textContent = "Not set";
-                el.classList.add("empty");
-                el.className = "info-value empty";
-                iconEl.style.background = "";
-                iconEl.style.borderColor = "";
-                if (heartSvg) heartSvg.style.fill = "";
+                pill.classList.add("empty");
+                iconEl.textContent = "";
+                textEl.textContent = "Not set";
+                textEl.style.cssText = "";
                 return;
             }
-            el.classList.remove("empty");
-            const t = tier.toLowerCase();
-            let tierSymbol = "";
-            let cls = "";
-            let svgFill = "";
-            if (t === "diamond") { tierSymbol = "◆"; cls = "diamond"; svgFill = "#b9f2ff"; }
-            else if (t === "gold") { tierSymbol = "★"; cls = "gold"; svgFill = "#ffd700"; }
-            else if (t === "silver") { tierSymbol = "●"; cls = "silver"; svgFill = "#e0e0e0"; }
-            else { el.textContent = tier; return; }
-            // Style icon - transparent bg, colored SVG
-            iconEl.style.background = "transparent";
-            iconEl.style.borderColor = "transparent";
-            if (heartSvg) heartSvg.style.fill = svgFill;
+            var t = tier.toLowerCase();
+            var tierSymbol = "";
+            var cls = "";
+            if (t === "diamond") { tierSymbol = "◆"; cls = "diamond"; }
+            else if (t === "gold") { tierSymbol = "★"; cls = "gold"; }
+            else if (t === "silver") { tierSymbol = "●"; cls = "silver"; }
+            else { iconEl.textContent = ""; textEl.textContent = tier; return; }
 
-            el.innerHTML = '<span class="loyalty-badge ' + cls + '"><span class="tier-icon">' + tierSymbol + '</span><span class="tier-text">' + tier + '</span></span>';
+            pill.classList.add(cls);
+            iconEl.textContent = tierSymbol;
+
+            // Apply shimmer to text
+            var gradients = {
+                diamond: "linear-gradient(90deg, #b9f2ff 0%, #ffffff 40%, #7fdbff 60%, #b9f2ff 100%)",
+                gold: "linear-gradient(90deg, #ffd700 0%, #fff5a0 40%, #ffcc00 60%, #ffd700 100%)",
+                silver: "linear-gradient(90deg, #e0e0e0 0%, #ffffff 40%, #c0c0c0 60%, #e0e0e0 100%)"
+            };
+            textEl.textContent = tier;
+            textEl.style.background = gradients[cls];
+            textEl.style.backgroundSize = "200% auto";
+            textEl.style.webkitBackgroundClip = "text";
+            textEl.style.backgroundClip = "text";
+            textEl.style.webkitTextFillColor = "transparent";
+            textEl.style.animation = "shimmer 3s linear infinite";
         }
 
         function formatAddress(data) {
@@ -1631,7 +1732,7 @@
                 await updateContact({ cr4e0_loyaltytier: newValue });
                 const fresh = await fetchContact();
                 renderProfile(fresh);
-                cancelEdit("val-loyalty", "edit-loyalty");
+                cancelLoyaltyEdit();
                 showToast("Loyalty tier updated!");
                 try {
                     const xrm = getXrmContext();
@@ -1640,6 +1741,10 @@
             } catch (err) {
                 showToast("Error: " + err.message);
             }
+        }
+
+        function cancelLoyaltyEdit() {
+            document.getElementById("loyalty-edit").classList.remove("open");
         }
 
         async function saveName(newName) {
@@ -1738,11 +1843,6 @@
                         startEdit("val-email", "edit-email", contactData?.emailaddress1);
                     } else if (field === "telephone1") {
                         startEdit("val-phone", "edit-phone", contactData?.telephone1);
-                    } else if (field === "cr4e0_loyaltytier") {
-                        // Pre-select the current tier in the dropdown
-                        const sel = document.getElementById("input-loyalty");
-                        sel.value = contactData?.cr4e0_loyaltytier || "";
-                        startEdit("val-loyalty", "edit-loyalty");
                     } else if (field === "cr4e0_segment") {
                         startEdit("val-segment", "edit-segment", contactData?.cr4e0_segment);
                     }
@@ -1766,6 +1866,25 @@
             document.getElementById("pill-csat").addEventListener("click", (e) => {
                 if (e.target.closest(".pill-edit")) return;
                 startPillEdit("pill-csat", "edit-pill-csat", "input-pill-csat", contactData?.new_csatscore);
+            });
+
+            // Loyalty pill click-to-edit
+            document.getElementById("loyalty-pill").addEventListener("click", (e) => {
+                if (e.target.closest(".loyalty-edit")) return;
+                var editEl = document.getElementById("loyalty-edit");
+                var sel = document.getElementById("input-loyalty");
+                sel.value = contactData?.cr4e0_loyaltytier || "";
+                editEl.classList.toggle("open");
+                e.stopPropagation();
+            });
+
+            // Close loyalty edit on outside click
+            document.addEventListener("click", (e) => {
+                var editEl = document.getElementById("loyalty-edit");
+                var pill = document.getElementById("loyalty-pill");
+                if (editEl && !pill.contains(e.target)) {
+                    editEl.classList.remove("open");
+                }
             });
 
         }
