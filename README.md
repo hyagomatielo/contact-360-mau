@@ -18,7 +18,8 @@ When you open a Contact record in Dynamics 365, this card appears and automatica
 
 - **Contact photo & name** — with the ability to upload or change the photo directly from the card.
 - **Loyalty tier pill** — Diamond, Gold, and Silver tiers displayed as an animated shimmer badge next to the contact name.
-- **Key details** — email, phone, address, and role/job title.
+- **Role line with account context** — shows the contact's job title and, when available, the parent account name as a clickable link that opens the Account record.
+- **Key details** — email, phone, and address with inline editing.
 - **NPS & CSAT scores** — quick satisfaction indicators shown as header pills.
 - **Relationship Health** — powered by Dynamics 365 Sales Insights, showing the current health status (Good / Fair / Poor), trend direction (Improving / Steady / Declining), and the next and last scheduled interactions.
 - **Sales tab** — current opportunity impact, open opportunities (clickable), closed won/lost counts, and win ratio.
@@ -29,7 +30,7 @@ When you open a Contact record in Dynamics 365, this card appears and automatica
 - **Loyalty tier badges** — Diamond, Gold, and Silver tiers each have their own animated shimmer effect.
 - **Color customization** — a built-in color picker lets you personalize the card's background and text colors.
 - **Inline editing** — click on any editable field to update it directly, without leaving the card. Changes save back to Dynamics 365 instantly.
-- **Clickable navigation** — click on opportunities or cases to open them directly in Dynamics 365.
+- **Clickable navigation** — click the parent account, opportunities, or cases to open them directly in Dynamics 365.
 
 ## How to Use It
 
@@ -42,5 +43,5 @@ No additional servers, databases, or installations are required. Everything runs
 ## Requirements
 
 - Microsoft Dynamics 365 Sales (online)
-- The custom fields referenced in the card (e.g., Loyalty Tier) must exist on the Contact entity in your environment
+- The custom fields referenced in the card (for example Loyalty Tier, NPS, and CSAT) must exist on the Contact entity in your environment
 - For Relationship Health data, **Sales Insights** must be enabled in your Dynamics 365 environment
