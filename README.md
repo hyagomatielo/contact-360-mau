@@ -8,6 +8,10 @@ A rich, visual contact profile card designed to be embedded directly inside Micr
 |:---------:|:-----------:|
 | ![Sales Tab](img/sales-tab.png) | ![Service Tab](img/service-tab.png) |
 
+### Embedded in Dynamics 365
+
+![Embedded in Dynamics 365](img/embedded-in-d365.png)
+
 ## What It Does
 
 When you open a Contact record in Dynamics 365, this card appears and automatically displays:
