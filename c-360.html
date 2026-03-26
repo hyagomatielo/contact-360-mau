@@ -835,6 +835,8 @@
             font-weight: 500;
         }
         .contact-role.empty { color: var(--text-muted); font-style: italic; font-weight: 400; }
+        .contact-role a { color: inherit; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 2px; cursor: pointer; }
+        .contact-role a:hover { text-decoration-style: solid; opacity: 0.9; }
         .profile-card.dark-text .contact-role { color: rgba(26,26,46,0.65); }
         .profile-card.dark-text .contact-role.empty { color: rgba(26,26,46,0.4); }
 
@@ -1411,7 +1413,7 @@
                 "emailaddress1", "telephone1",
                 "address1_line1", "address1_city", "address1_stateorprovince", "address1_postalcode", "address1_country", "address1_composite",
                 "cr4e0_customerid", "cr4e0_loyaltytier",
-                "jobtitle",
+                "jobtitle", "_parentcustomerid_value",
                 "entityimage_url",
             ].join(",");
 
@@ -1440,10 +1442,26 @@
             // Name
             document.getElementById("contact-name").textContent = data.fullname || "—";
 
-            // Role / Position
+            // Role / Position + Account
             var roleEl = document.getElementById("contact-role");
-            if (data.jobtitle) {
-                roleEl.textContent = data.jobtitle;
+            var accountName = data["_parentcustomerid_value@OData.Community.Display.V1.FormattedValue"] || "";
+            var accountId = data._parentcustomerid_value || "";
+            if (data.jobtitle || accountName) {
+                roleEl.innerHTML = "";
+                if (data.jobtitle) roleEl.appendChild(document.createTextNode(data.jobtitle));
+                if (data.jobtitle && accountName) roleEl.appendChild(document.createTextNode(" at "));
+                if (accountName) {
+                    var link = document.createElement("a");
+                    link.textContent = accountName;
+                    link.title = "Open account record";
+                    link.addEventListener("click", function(e) {
+                        e.stopPropagation();
+                        if (window.parent && window.parent.Xrm) {
+                            window.parent.Xrm.Navigation.openForm({ entityName: "account", entityId: accountId });
+                        }
+                    });
+                    roleEl.appendChild(link);
+                }
                 roleEl.classList.remove("empty");
             } else {
                 roleEl.textContent = "";
