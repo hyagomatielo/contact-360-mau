@@ -18,7 +18,7 @@ When you open a Contact record in Dynamics 365, this card appears and automatica
 
 - **Contact photo & name** — with the ability to upload or change the photo directly from the card.
 - **Loyalty tier pill** — Diamond, Gold, and Silver tiers displayed as an animated shimmer badge next to the contact name.
-- **Key details** — email, phone, address, Customer ID, and role/job title.
+- **Key details** — email, phone, address, and role/job title.
 - **NPS & CSAT scores** — quick satisfaction indicators shown as header pills.
 - **Relationship Health** — powered by Dynamics 365 Sales Insights, showing the current health status (Good / Fair / Poor), trend direction (Improving / Steady / Declining), and the next and last scheduled interactions.
 - **Sales tab** — current opportunity impact, open opportunities (clickable), closed won/lost counts, and win ratio.
@@ -42,5 +42,5 @@ No additional servers, databases, or installations are required. Everything runs
 ## Requirements
 
 - Microsoft Dynamics 365 Sales (online)
-- The custom fields referenced in the card (e.g., Loyalty Tier, Customer ID) must exist on the Contact entity in your environment
+- The custom fields referenced in the card (e.g., Loyalty Tier) must exist on the Contact entity in your environment
 - For Relationship Health data, **Sales Insights** must be enabled in your Dynamics 365 environment

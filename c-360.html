@@ -1117,21 +1117,6 @@
 
         <!-- Contact Info Section -->
         <div class="info-section">
-            <div class="info-row" data-field="cr4e0_customerid" data-type="string">
-                <div class="info-icon">
-                    <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12zM6 10h2v2H6v-2zm0 4h8v2H6v-2zm10-4h2v2h-2v-2zm-4 0h2v2h-2v-2z"/></svg>
-                </div>
-                <div class="info-content">
-                    <div class="info-label">Customer ID</div>
-                    <div class="info-value" id="val-customerid"></div>
-                    <div class="inline-edit" id="edit-customerid">
-                        <input type="text" id="input-customerid" placeholder="Enter Customer ID" />
-                        <button class="edit-btn save" onclick="saveField('cr4e0_customerid','input-customerid','val-customerid','edit-customerid','string')">&#10003;</button>
-                        <button class="edit-btn cancel" onclick="cancelEdit('val-customerid','edit-customerid')">&#10007;</button>
-                    </div>
-                </div>
-            </div>
-
             <div class="info-row" data-field="emailaddress1" data-type="string">
                 <div class="info-icon">
                     <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
@@ -1412,7 +1397,7 @@
                 "fullname", "firstname", "lastname",
                 "emailaddress1", "telephone1",
                 "address1_line1", "address1_city", "address1_stateorprovince", "address1_postalcode", "address1_country", "address1_composite",
-                "cr4e0_customerid", "cr4e0_loyaltytier",
+                "cr4e0_loyaltytier",
                 "jobtitle", "_parentcustomerid_value",
                 "entityimage_url",
             ].join(",");
@@ -1489,7 +1474,6 @@
             }
 
             // Info fields
-            setFieldValue("val-customerid", data.cr4e0_customerid, "No Customer ID");
             setFieldValue("val-email", data.emailaddress1, "No email");
             setFieldValue("val-phone", data.telephone1, "No phone");
 
@@ -1838,8 +1822,6 @@
                         document.getElementById("input-address-zip").value = contactData?.address1_postalcode || "";
                         document.getElementById("input-address-country").value = contactData?.address1_country || "";
                         startEdit("val-address", "edit-address");
-                    } else if (field === "cr4e0_customerid") {
-                        startEdit("val-customerid", "edit-customerid", contactData?.cr4e0_customerid);
                     } else if (field === "emailaddress1") {
                         startEdit("val-email", "edit-email", contactData?.emailaddress1);
                     } else if (field === "telephone1") {
