@@ -1364,8 +1364,9 @@
                 return origin;
             }
 
-            // Hardcoded fallback
-            return "https://hyagom.crm.dynamics.com";
+            // No tenant fallback — when running inside Dynamics, Xrm context provides the URL.
+            console.warn("[contact-360] Unable to detect Dynamics 365 client URL. This component must run as a web resource inside a Dynamics 365 form.");
+            return "";
         }
 
         // ─── API Helpers ────────────────────────────────────────
