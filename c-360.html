@@ -1392,17 +1392,48 @@
             return res.json();
         }
 
+        // Optional custom fields - may not exist in every environment.
+        // If any of these cause a 400 error, they are dropped and the request is retried.
+        const OPTIONAL_CONTACT_FIELDS = ["cr4e0_loyaltytier"];
+        const missingOptionalFields = new Set();
+
         async function fetchContact() {
-            const select = [
+            const baseFields = [
                 "fullname", "firstname", "lastname",
                 "emailaddress1", "telephone1",
                 "address1_line1", "address1_city", "address1_stateorprovince", "address1_postalcode", "address1_country", "address1_composite",
-                "cr4e0_loyaltytier",
                 "jobtitle", "_parentcustomerid_value",
                 "entityimage_url",
-            ].join(",");
+            ];
+            const optionalFields = OPTIONAL_CONTACT_FIELDS.filter(f => !missingOptionalFields.has(f));
+            const select = baseFields.concat(optionalFields).join(",");
 
-            return await crmApiFetch("/contacts(" + contactId + ")?$select=" + select);
+            try {
+                return await crmApiFetch("/contacts(" + contactId + ")?$select=" + select);
+            } catch (err) {
+                // If a custom field is missing in this environment, Dataverse returns 400.
+                // Identify which optional field(s) are missing, mark them, and retry.
+                const msg = String(err && err.message || "");
+                if (msg.indexOf("400") !== -1 && optionalFields.length) {
+                    let dropped = false;
+                    for (const f of optionalFields) {
+                        if (msg.indexOf(f) !== -1) {
+                            missingOptionalFields.add(f);
+                            dropped = true;
+                            console.warn("[contact-360] Optional field not present in this environment, dropping:", f);
+                        }
+                    }
+                    // If we couldn't identify a specific field from the error text, drop all remaining optional fields as a safety net.
+                    if (!dropped) {
+                        for (const f of optionalFields) {
+                            missingOptionalFields.add(f);
+                            console.warn("[contact-360] Dropping optional field after 400 error:", f);
+                        }
+                    }
+                    return await fetchContact();
+                }
+                throw err;
+            }
         }
 
         async function updateContact(fields) {
@@ -1487,8 +1518,14 @@
             // CSAT Score
             renderHeaderPill('pill-csat', 'csat-pill-val', data.new_csatscore, 100);
 
-            // Loyalty
-            renderLoyaltyTier(data.cr4e0_loyaltytier);
+            // Loyalty - hide pill entirely if the field doesn't exist in this environment
+            var loyaltyPillEl = document.getElementById("loyalty-pill");
+            if (missingOptionalFields.has("cr4e0_loyaltytier")) {
+                if (loyaltyPillEl) loyaltyPillEl.style.display = "none";
+            } else {
+                if (loyaltyPillEl) loyaltyPillEl.style.display = "";
+                renderLoyaltyTier(data.cr4e0_loyaltytier);
+            }
 
 
         }
